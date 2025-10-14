@@ -1,0 +1,187 @@
+---
+// 首页 - 展示统计和最新内容
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import Card from '../components/Card.astro';
+
+// 获取所有集合
+const games = await getCollection('games');
+const movies = await getCollection('movies');
+const books = await getCollection('books');
+
+// 计算平均评分
+const avgGameRating = games.length > 0
+  ? (games.reduce((sum, g) => sum + g.data.rating, 0) / games.length).toFixed(1)
+  : 0;
+const avgMovieRating = movies.length > 0
+  ? (movies.reduce((sum, m) => sum + m.data.rating, 0) / movies.length).toFixed(1)
+  : 0;
+const avgBookRating = books.length > 0
+  ? (books.reduce((sum, b) => sum + b.data.rating, 0) / books.length).toFixed(1)
+  : 0;
+
+// 获取最新内容（各取前 3 项）
+const recentGames = [...games]
+  .sort((a, b) => new Date(b.data.completedDate).getTime() - new Date(a.data.completedDate).getTime())
+  .slice(0, 3);
+
+const recentMovies = [...movies]
+  .sort((a, b) => new Date(b.data.watchDate).getTime() - new Date(a.data.watchDate).getTime())
+  .slice(0, 3);
+
+const recentBooks = [...books]
+  .sort((a, b) => new Date(b.data.readDate).getTime() - new Date(a.data.readDate).getTime())
+  .slice(0, 3);
+---
+
+<Layout title="首页">
+  <div class="hero">
+    <h1>🏆 我的成就展示</h1>
+    <p class="hero-subtitle">记录玩过的游戏、看过的电影、读过的书籍</p>
+  </div>
+
+  <!-- 统计卡片 -->
+  <div class="stats">
+    <div class="stat-card">
+      <span class="stat-number">{games.length}</span>
+      <span class="stat-label">游戏</span>
+      <div style="margin-top: 0.5rem; font-size: 0.9rem;">
+        平均评分: {avgGameRating} ⭐
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-number">{movies.length}</span>
+      <span class="stat-label">电影</span>
+      <div style="margin-top: 0.5rem; font-size: 0.9rem;">
+        平均评分: {avgMovieRating} ⭐
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-number">{books.length}</span>
+      <span class="stat-label">书籍</span>
+      <div style="margin-top: 0.5rem; font-size: 0.9rem;">
+        平均评分: {avgBookRating} ⭐
+      </div>
+    </div>
+  </div>
+
+  <!-- 最近游戏 -->
+  {recentGames.length > 0 && (
+    <section>
+      <h2>🎮 最近游戏</h2>
+      <div class="grid">
+        {recentGames.map(game => (
+          <Card
+            title={game.data.title}
+            rating={game.data.rating}
+            date={game.data.completedDate}
+            tags={game.data.tags}
+            href={`/games/${game.slug}`}
+            cover={game.data.cover}
+            favorite={game.data.favorite}
+            meta={`${game.data.platform} · ${game.data.status}`}
+          />
+        ))}
+      </div>
+      <div style="text-align: center; margin-top: 2rem;">
+        <a href="/games" class="view-all-link">查看全部游戏 →</a>
+      </div>
+    </section>
+  )}
+
+  <!-- 最近电影 -->
+  {recentMovies.length > 0 && (
+    <section style="margin-top: 3rem;">
+      <h2>🎬 最近电影</h2>
+      <div class="grid">
+        {recentMovies.map(movie => (
+          <Card
+            title={movie.data.title}
+            rating={movie.data.rating}
+            date={movie.data.watchDate}
+            tags={movie.data.tags}
+            href={`/movies/${movie.slug}`}
+            cover={movie.data.cover}
+            favorite={movie.data.favorite}
+            meta={`${movie.data.director} · ${movie.data.year}`}
+          />
+        ))}
+      </div>
+      <div style="text-align: center; margin-top: 2rem;">
+        <a href="/movies" class="view-all-link">查看全部电影 →</a>
+      </div>
+    </section>
+  )}
+
+  <!-- 最近书籍 -->
+  {recentBooks.length > 0 && (
+    <section style="margin-top: 3rem;">
+      <h2>📚 最近书籍</h2>
+      <div class="grid">
+        {recentBooks.map(book => (
+          <Card
+            title={book.data.title}
+            rating={book.data.rating}
+            date={book.data.readDate}
+            tags={book.data.tags}
+            href={`/books/${book.slug}`}
+            cover={book.data.cover}
+            favorite={book.data.favorite}
+            meta={book.data.author}
+          />
+        ))}
+      </div>
+      <div style="text-align: center; margin-top: 2rem;">
+        <a href="/books" class="view-all-link">查看全部书籍 →</a>
+      </div>
+    </section>
+  )}
+</Layout>
+
+<style>
+  .hero {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.25rem;
+    color: var(--color-text-secondary);
+  }
+
+  .view-all-link {
+    display: inline-block;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--color-primary);
+    padding: 0.75rem 1.5rem;
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius);
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .view-all-link:hover {
+    background-color: var(--color-primary);
+    color: white;
+    text-decoration: none;
+  }
+
+  section {
+    margin-top: 3rem;
+  }
+
+  @media (max-width: 768px) {
+    .hero h1 {
+      font-size: 2rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1rem;
+    }
+  }
+</style>

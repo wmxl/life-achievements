@@ -1,0 +1,159 @@
+---
+// 电影详情页（动态路由）
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+// 生成所有电影的静态路径
+export async function getStaticPaths() {
+  const movies = await getCollection('movies');
+  return movies.map(movie => ({
+    params: { slug: movie.slug },
+    props: { movie },
+  }));
+}
+
+interface Props {
+  movie: CollectionEntry<'movies'>;
+}
+
+const { movie } = Astro.props;
+const { Content } = await movie.render();
+
+// 生成星星评分
+const stars = '⭐'.repeat(movie.data.rating);
+---
+
+<Layout title={movie.data.title}>
+  <a href="/movies" class="back-link">← 返回电影列表</a>
+
+  <article class="detail-page">
+    <header class="detail-header">
+      {movie.data.cover && (
+        <img src={movie.data.cover} alt={movie.data.title} class="detail-cover" />
+      )}
+      <div class="detail-info">
+        <h1>
+          {movie.data.title}
+          {movie.data.favorite && <span class="favorite-badge">❤️ 最爱</span>}
+        </h1>
+        <div class="meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">导演</span>
+            <span class="meta-value">{movie.data.director}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">上映年份</span>
+            <span class="meta-value">{movie.data.year}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">观看日期</span>
+            <span class="meta-value">{movie.data.watchDate}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">评分</span>
+            <span class="meta-value">{stars}</span>
+          </div>
+        </div>
+        <div class="tags-section">
+          {movie.data.tags.map(tag => (
+            <span class="tag">{tag}</span>
+          ))}
+        </div>
+      </div>
+    </header>
+
+    <div class="detail-content">
+      <Content />
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .detail-page {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .detail-header {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .detail-cover {
+    width: 100%;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .detail-info h1 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .meta-label {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.25rem;
+  }
+
+  .meta-value {
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  .tags-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .detail-content {
+    line-height: 1.8;
+  }
+
+  .detail-content :global(h2) {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  .detail-content :global(ul) {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .detail-content :global(li) {
+    margin-bottom: 0.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .detail-header {
+      grid-template-columns: 1fr;
+    }
+
+    .detail-cover {
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .meta-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

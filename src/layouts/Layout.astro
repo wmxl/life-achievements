@@ -1,0 +1,245 @@
+---
+import Header from '../components/Header.astro';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title} - 我的成就展示</title>
+  </head>
+  <body>
+    <Header />
+    <main>
+      <slot />
+    </main>
+    <footer>
+      <p>© 2025 我的成就展示 | 基于 Astro 构建</p>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --color-primary: #3b82f6;
+    --color-bg: #ffffff;
+    --color-bg-secondary: #f3f4f6;
+    --color-text: #1f2937;
+    --color-text-secondary: #6b7280;
+    --color-border: #e5e7eb;
+    --spacing: 1rem;
+    --radius: 8px;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    line-height: 1.6;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+  }
+
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    min-height: calc(100vh - 200px);
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--color-text);
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    margin-top: 2rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  p {
+    margin-bottom: 1rem;
+  }
+
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  footer {
+    background-color: var(--color-bg-secondary);
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-text-secondary);
+    border-top: 1px solid var(--color-border);
+  }
+
+  /* 网格布局 */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  /* 卡片样式 */
+  .card {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+  }
+
+  .card h2 {
+    font-size: 1.25rem;
+    margin: 0 0 0.5rem 0;
+    color: var(--color-text);
+  }
+
+  .card-cover {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+  }
+
+  .card-rating {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: #f59e0b;
+  }
+
+  .card-meta {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: auto;
+  }
+
+  .tag {
+    display: inline-block;
+    background-color: var(--color-bg-secondary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .favorite-badge {
+    display: inline-block;
+    background-color: #fef3c7;
+    color: #92400e;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+  }
+
+  /* 统计卡片 */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: var(--radius);
+    text-align: center;
+  }
+
+  .stat-card:nth-child(2) {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+
+  .stat-card:nth-child(3) {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
+
+  .stat-number {
+    font-size: 3rem;
+    font-weight: bold;
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+
+  /* 返回链接 */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+    color: var(--color-primary);
+  }
+
+  .back-link:hover {
+    text-decoration: underline;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2rem;
+    }
+
+    main {
+      padding: 1.5rem 1rem;
+    }
+
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .stats {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

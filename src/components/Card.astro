@@ -1,0 +1,36 @@
+---
+// 卡片组件 - 用于展示游戏、电影、书籍
+interface Props {
+  title: string;
+  rating: number;
+  date: string;
+  tags: string[];
+  href: string;
+  cover?: string;
+  favorite?: boolean;
+  meta?: string; // 额外的元数据信息（如平台、导演、作者）
+}
+
+const { title, rating, date, tags, href, cover, favorite, meta } = Astro.props;
+
+// 生成星星评分
+const stars = '⭐'.repeat(rating);
+---
+
+<a href={href} class="card">
+  {cover && <img src={cover} alt={title} class="card-cover" />}
+  <div class="card-content">
+    <h2>
+      {title}
+      {favorite && <span class="favorite-badge">❤️ 最爱</span>}
+    </h2>
+    <div class="card-rating">{stars}</div>
+    {meta && <div class="card-meta">{meta}</div>}
+    <div class="card-meta">📅 {date}</div>
+    <div class="card-tags">
+      {tags.map(tag => (
+        <span class="tag">{tag}</span>
+      ))}
+    </div>
+  </div>
+</a>
