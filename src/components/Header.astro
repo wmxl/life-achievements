@@ -1,25 +1,26 @@
 ---
 // 导航栏组件
 const currentPath = Astro.url.pathname;
+const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // 移除尾部斜杠，统一处理
 ---
 
 <header>
   <nav>
     <div class="logo">
-      <a href="/">🏆 我的成就</a>
+      <a href={`${base}/`}>🏆 我的成就</a>
     </div>
     <ul class="nav-links">
       <li>
-        <a href="/" class={currentPath === '/' ? 'active' : ''}>首页</a>
+        <a href={`${base}/`} class={currentPath === `${base}/` || currentPath === base ? 'active' : ''}>首页</a>
       </li>
       <li>
-        <a href="/games" class={currentPath.startsWith('/games') ? 'active' : ''}>游戏</a>
+        <a href={`${base}/games`} class={currentPath.includes('/games') ? 'active' : ''}>游戏</a>
       </li>
       <li>
-        <a href="/movies" class={currentPath.startsWith('/movies') ? 'active' : ''}>电影</a>
+        <a href={`${base}/movies`} class={currentPath.includes('/movies') ? 'active' : ''}>电影</a>
       </li>
       <li>
-        <a href="/books" class={currentPath.startsWith('/books') ? 'active' : ''}>书籍</a>
+        <a href={`${base}/books`} class={currentPath.includes('/books') ? 'active' : ''}>书籍</a>
       </li>
     </ul>
   </nav>

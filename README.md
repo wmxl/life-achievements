@@ -158,38 +158,38 @@ favorite: true
 
 ## 🌐 部署到 GitHub Pages
 
-### 1. 配置 Astro
+### 方式一：部署到根域名（推荐）
 
-在 `astro.config.mjs` 中设置你的站点信息：
+**最简单的方式，本地和线上完全一致！**
 
-```javascript
-export default defineConfig({
-  site: 'https://your-username.github.io',
-  base: '/life-achievements',  // 如果仓库名是 your-username.github.io 则省略此行
-});
-```
+1. **创建仓库**：仓库名必须是 `your-username.github.io`
+2. **配置已完成**：`astro.config.mjs` 中 base 已注释，无需修改
+3. **推送代码**：
+   ```bash
+   git remote set-url origin https://github.com/your-username/your-username.github.io.git
+   git push -u origin main
+   ```
+4. **启用 Pages**：Settings → Pages → Source 选择 "GitHub Actions"
+5. **访问**：`https://your-username.github.io`
 
-### 2. 启用 GitHub Pages
+### 方式二：部署到子路径
 
-1. 进入 GitHub 仓库的 Settings
-2. 找到 Pages 选项
-3. Source 选择 "GitHub Actions"
+如果仓库名是 `life-achievements`：
 
-### 3. 推送代码
+1. **修改配置**：编辑 `astro.config.mjs`，取消注释：
+   ```javascript
+   base: '/life-achievements',  // 取消注释这一行
+   ```
+2. **推送代码**：
+   ```bash
+   git add .
+   git commit -m "Add base path"
+   git push origin main
+   ```
+3. **启用 Pages**：Settings → Pages → Source 选择 "GitHub Actions"
+4. **访问**：`https://your-username.github.io/life-achievements`
 
-```bash
-git add .
-git commit -m "Initial commit"
-git push origin main
-```
-
-推送后，GitHub Actions 会自动构建并部署网站。
-
-### 4. 访问网站
-
-部署完成后，访问：
-- 用户/组织站点：`https://your-username.github.io`
-- 项目站点：`https://your-username.github.io/life-achievements`
+💡 **详细步骤**：查看 `DEPLOYMENT_GUIDE.md`
 
 ## 🎨 自定义样式
 

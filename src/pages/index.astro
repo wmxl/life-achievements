@@ -4,6 +4,8 @@ import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 import Card from '../components/Card.astro';
 
+const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // 移除尾部斜杠，统一处理
+
 // 获取所有集合
 const games = await getCollection('games');
 const movies = await getCollection('movies');
@@ -76,7 +78,7 @@ const recentBooks = [...books]
             rating={game.data.rating}
             date={game.data.completedDate}
             tags={game.data.tags}
-            href={`/games/${game.slug}`}
+            href={`${base}/games/${game.slug}`}
             cover={game.data.cover}
             favorite={game.data.favorite}
             meta={`${game.data.platform} · ${game.data.status}`}
@@ -84,7 +86,7 @@ const recentBooks = [...books]
         ))}
       </div>
       <div style="text-align: center; margin-top: 2rem;">
-        <a href="/games" class="view-all-link">查看全部游戏 →</a>
+        <a href={`${base}/games`} class="view-all-link">查看全部游戏 →</a>
       </div>
     </section>
   )}
@@ -100,7 +102,7 @@ const recentBooks = [...books]
             rating={movie.data.rating}
             date={movie.data.watchDate}
             tags={movie.data.tags}
-            href={`/movies/${movie.slug}`}
+            href={`${base}/movies/${movie.slug}`}
             cover={movie.data.cover}
             favorite={movie.data.favorite}
             meta={`${movie.data.director} · ${movie.data.year}`}
@@ -108,7 +110,7 @@ const recentBooks = [...books]
         ))}
       </div>
       <div style="text-align: center; margin-top: 2rem;">
-        <a href="/movies" class="view-all-link">查看全部电影 →</a>
+        <a href={`${base}/movies`} class="view-all-link">查看全部电影 →</a>
       </div>
     </section>
   )}
@@ -124,7 +126,7 @@ const recentBooks = [...books]
             rating={book.data.rating}
             date={book.data.readDate}
             tags={book.data.tags}
-            href={`/books/${book.slug}`}
+            href={`${base}/books/${book.slug}`}
             cover={book.data.cover}
             favorite={book.data.favorite}
             meta={book.data.author}
@@ -132,7 +134,7 @@ const recentBooks = [...books]
         ))}
       </div>
       <div style="text-align: center; margin-top: 2rem;">
-        <a href="/books" class="view-all-link">查看全部书籍 →</a>
+        <a href={`${base}/books`} class="view-all-link">查看全部书籍 →</a>
       </div>
     </section>
   )}

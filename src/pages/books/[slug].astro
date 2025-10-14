@@ -4,6 +4,8 @@ import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 
+const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // 移除尾部斜杠，统一处理
+
 // 生成所有书籍的静态路径
 export async function getStaticPaths() {
   const books = await getCollection('books');
@@ -25,7 +27,7 @@ const stars = '⭐'.repeat(book.data.rating);
 ---
 
 <Layout title={book.data.title}>
-  <a href="/books" class="back-link">← 返回书籍列表</a>
+  <a href={`${base}/books`} class="back-link">← 返回书籍列表</a>
 
   <article class="detail-page">
     <header class="detail-header">
