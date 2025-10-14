@@ -7,6 +7,7 @@ status: "已完成"
 playTime: 95
 tags: [魂系列, RPG, 开放世界, 黑暗奇幻]
 favorite: true
+steamUrl: "https://store.steampowered.com/app/1245620/ELDEN_RING/"
 ---
 
 ## 我的评价

@@ -14,6 +14,7 @@ const gamesCollection = defineCollection({
     cover: z.string().optional(),
     playTime: z.number().optional(),
     favorite: z.boolean().optional(),
+    steamUrl: z.string().optional(), // Steam 页面链接
   }),
 });
 

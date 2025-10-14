@@ -109,6 +109,7 @@ git push
 | playTime | number | ❌ | 游戏时长（小时） |
 | cover | string | ❌ | 封面图片路径 |
 | favorite | boolean | ❌ | 是否最爱 |
+| steamUrl | string | ❌ | Steam 页面链接 |
 
 #### 电影 (movies)
 

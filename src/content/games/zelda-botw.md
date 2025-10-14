@@ -7,6 +7,7 @@ status: "已完成"
 playTime: 120
 tags: [开放世界, 冒险, 任天堂]
 favorite: true
+# steamUrl 字段可选，任天堂平台游戏通常没有 Steam 页面
 ---
 
 ## 我的评价

@@ -7,6 +7,7 @@ status: "已完成"
 playTime: 45
 tags: [类魂, 银河恶魔城, 独立游戏]
 favorite: false
+steamUrl: "https://store.steampowered.com/app/367520/Hollow_Knight/"
 ---
 
 ## 我的评价

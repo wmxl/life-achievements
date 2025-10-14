@@ -63,6 +63,13 @@ const stars = '⭐'.repeat(game.data.rating);
             <span class="meta-value">{stars}</span>
           </div>
         </div>
+        {game.data.steamUrl && (
+          <div class="steam-link-section">
+            <a href={game.data.steamUrl} target="_blank" rel="noopener noreferrer" class="steam-link">
+              🎮 在 Steam 上查看
+            </a>
+          </div>
+        )}
         <div class="tags-section">
           {game.data.tags.map(tag => (
             <span class="tag">{tag}</span>
@@ -122,6 +129,28 @@ const stars = '⭐'.repeat(game.data.rating);
   .meta-value {
     font-weight: 500;
     color: var(--color-text);
+  }
+
+  .steam-link-section {
+    margin: 1rem 0;
+  }
+
+  .steam-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #1b2838 0%, #2a475e 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--radius);
+    font-weight: 500;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .steam-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(27, 40, 56, 0.4);
+    text-decoration: none;
   }
 
   .tags-section {
