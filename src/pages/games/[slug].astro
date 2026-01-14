@@ -143,7 +143,7 @@ export const prerender = false;
       const gameDetail = document.getElementById('game-detail');
       if (gameDetail) {
         const stars = '⭐'.repeat(game.rating);
-        
+
         gameDetail.innerHTML = `
           <header class="detail-header">
             ${game.cover ? `<img src="${game.cover}" alt="${game.title}" class="detail-cover" />` : ''}
@@ -195,7 +195,7 @@ export const prerender = false;
 
         // 更新页面标题
         document.title = `${game.title} - 游戏清单`;
-        
+
         gameDetail.style.display = 'block';
       }
 
@@ -213,4 +213,3 @@ export const prerender = false;
 
   loadGame();
 </script>
-

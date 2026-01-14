@@ -159,11 +159,10 @@ export default async function handler(
 
     // 设置缓存头（可选，减少 Notion API 调用）
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
-    
+
     return res.status(200).json({ games });
   } catch (error: any) {
     console.error('Error fetching games:', error);
     return res.status(500).json({ error: error.message || 'Internal server error' });
   }
 }
-

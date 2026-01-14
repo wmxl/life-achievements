@@ -227,7 +227,7 @@ favorite: true
    - 点击 **"Deploy"**
 
 3. **配置环境变量**
-   
+
    部署后，在 Vercel 项目设置中添加环境变量：
    - Settings → Environment Variables
    - 添加：
