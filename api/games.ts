@@ -1,29 +1,18 @@
-// Notion API 集成（使用原生 fetch API）
+// Vercel Serverless Function - 获取游戏列表
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-// 游戏数据类型
-export interface NotionGame {
-  id: string;
-  title: string;
-  platform: string;
-  rating: number;
-  completedDate: string;
-  status: '已完成' | '进行中' | '已放弃';
-  playTime?: number;
-  tags: string[];
-  steamUrl?: string;
-  cover?: string;
-  favorite: boolean;
-  content: string;
-  slug: string;
-}
+const NOTION_TOKEN = process.env.NOTION_TOKEN;
+const GAMES_DATABASE_ID = process.env.NOTION_GAMES_DB_ID;
 
-const NOTION_TOKEN = import.meta.env.NOTION_TOKEN;
-const GAMES_DATABASE_ID = import.meta.env.NOTION_GAMES_DB_ID;
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse
+) {
+  // 只允许 GET 请求
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-/**
- * 从 Notion 获取所有游戏（使用原生 fetch）
- */
-export async function getGamesFromNotion(): Promise<NotionGame[]> {
   try {
     const response = await fetch(
       `https://api.notion.com/v1/databases/${GAMES_DATABASE_ID}/query`,
@@ -48,11 +37,11 @@ export async function getGamesFromNotion(): Promise<NotionGame[]> {
     if (!response.ok) {
       const error = await response.json();
       console.error('Notion API error:', error);
-      return [];
+      return res.status(response.status).json({ error: error.message });
     }
 
     const data = await response.json();
-    const games: NotionGame[] = [];
+    const games = [];
 
     for (const page of data.results) {
       if (!('properties' in page)) continue;
@@ -65,7 +54,7 @@ export async function getGamesFromNotion(): Promise<NotionGame[]> {
           ? properties['Name'].title[0]?.plain_text || '未命名游戏'
           : '未命名游戏';
 
-      // 提取平台（兼容 select 和 rich_text）
+      // 提取平台
       let platform = 'Unknown';
       if (properties['平台']?.type === 'select') {
         platform = properties['平台'].select?.name || 'Unknown';
@@ -73,7 +62,7 @@ export async function getGamesFromNotion(): Promise<NotionGame[]> {
         platform = properties['平台'].rich_text[0].plain_text;
       }
 
-      // 提取评分（兼容 select 和 rich_text）
+      // 提取评分
       let rating = 3;
       if (properties['评分']?.type === 'select') {
         const ratingStr = properties['评分'].select?.name || '';
@@ -89,8 +78,8 @@ export async function getGamesFromNotion(): Promise<NotionGame[]> {
           ? properties['完成日期'].date?.start || new Date().toISOString().split('T')[0]
           : new Date().toISOString().split('T')[0];
 
-      // 提取状态（兼容 select 和 rich_text）
-      let status: '已完成' | '进行中' | '已放弃' = '进行中';
+      // 提取状态
+      let status = '进行中';
       if (properties['状态']?.type === 'select') {
         const statusStr = properties['状态'].select?.name;
         if (statusStr === '已完成' || statusStr === '进行中' || statusStr === '已放弃') {
@@ -103,10 +92,7 @@ export async function getGamesFromNotion(): Promise<NotionGame[]> {
         }
       }
 
-      // 游戏时长 - 已删除，设为 undefined
-      const playTime = undefined;
-
-      // 提取标签（兼容 multi_select 和 rich_text）
+      // 提取标签
       let tags: string[] = [];
       if (properties['标签']?.type === 'multi_select') {
         tags = properties['标签'].multi_select.map((tag: any) => tag.name);
@@ -132,7 +118,7 @@ export async function getGamesFromNotion(): Promise<NotionGame[]> {
         }
       }
 
-      // 提取是否最爱（兼容 checkbox 和 rich_text）
+      // 提取是否最爱
       let favorite = false;
       if (properties['最爱']?.type === 'checkbox') {
         favorite = properties['最爱'].checkbox;
@@ -149,7 +135,7 @@ export async function getGamesFromNotion(): Promise<NotionGame[]> {
           .join('');
       }
 
-      // 生成 slug（用于 URL）
+      // 生成 slug
       const slug = title
         .toLowerCase()
         .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
@@ -162,7 +148,6 @@ export async function getGamesFromNotion(): Promise<NotionGame[]> {
         rating,
         completedDate,
         status,
-        playTime,
         tags,
         steamUrl,
         cover,
@@ -172,17 +157,13 @@ export async function getGamesFromNotion(): Promise<NotionGame[]> {
       });
     }
 
-    return games;
-  } catch (error) {
-    console.error('Error fetching games from Notion:', error);
-    return [];
+    // 设置缓存头（可选，减少 Notion API 调用）
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
+    
+    return res.status(200).json({ games });
+  } catch (error: any) {
+    console.error('Error fetching games:', error);
+    return res.status(500).json({ error: error.message || 'Internal server error' });
   }
 }
 
-/**
- * 获取单个游戏详情（通过 slug）
- */
-export async function getGameBySlug(slug: string): Promise<NotionGame | null> {
-  const games = await getGamesFromNotion();
-  return games.find((game) => game.slug === slug) || null;
-}

@@ -43,7 +43,7 @@ npm install
 npm run dev
 ```
 
-访问 `http://localhost:4321/life-achievements/games-notion` 查看游戏列表。
+访问 `http://localhost:4321/games` 查看游戏列表。
 
 ### 构建生产版本
 
@@ -98,7 +98,7 @@ life-achievements/
 
 ## 📝 如何添加游戏
 
-### 添加游戏的完整流程
+### 添加游戏的完整流程（实时更新，无需部署！）
 
 **步骤 1：在 Notion 中添加游戏**
 1. 打开你的 Notion 游戏数据库
@@ -116,36 +116,18 @@ life-achievements/
    - **评价**: 写下你的游戏体验（可选）
 4. 保存
 
-**步骤 2：触发部署更新线上数据**
+**步骤 2：查看更新**
 
-有 3 种方式让线上网站同步 Notion 的新数据：
+✅ **无需任何操作！** 刷新网页即可看到最新数据！
 
-**方式 A：推送空提交（手动触发）**
-```bash
-git commit --allow-empty -m "更新游戏数据"
-git push
-```
-等待 2-5 分钟，GitHub Actions 会自动构建并部署。
+- 本地：`http://localhost:4321/games`
+- 线上：`https://life-achievements.vercel.app/games`
 
-**方式 B：在 GitHub 手动触发**
-1. 访问：`https://github.com/你的用户名/life-achievements/actions`
-2. 点击 **"Deploy to GitHub Pages"** workflow
-3. 点击右侧 **"Run workflow"** 按钮
-4. 点击绿色的 **"Run workflow"** 确认
-
-**方式 C：自动定时部署（推荐，已配置）**
-
-✅ 已配置每天自动部署！每天早上 8 点自动从 Notion 拉取最新数据并更新网站。
-
-你只需在 Notion 中添加游戏，第二天早上就会自动同步到线上。
-
-**为什么本地能实时更新，线上需要重新部署？**
-- **本地**：`npm run dev` 每次刷新都调用 Notion API，获取最新数据
-- **线上**：静态网站，构建时生成 HTML 文件，内容固定，需要重新构建才能更新
-
-**步骤 3：查看更新**
-- 本地：刷新 `http://localhost:4321/life-achievements/games-notion`（实时）
-- 线上：等待部署完成后访问 `https://你的用户名.github.io/life-achievements/games-notion`
+**实时更新原理**：
+- 使用 Vercel Serverless Function 实时调用 Notion API
+- 每次访问页面都获取最新数据，0 延迟
+- Token 安全存储在 Vercel 环境变量中
+- 完全免费（Vercel 免费额度对个人使用足够）
 
 ---
 
@@ -227,7 +209,42 @@ favorite: true
 在这里写下你的阅读笔记和思考。
 ```
 
-## 🌐 部署到 GitHub Pages
+## 🚀 部署到 Vercel（推荐，实时更新）
+
+### 一键部署
+
+1. **推送代码到 GitHub**
+   ```bash
+   git add .
+   git commit -m "迁移到 Vercel"
+   git push
+   ```
+
+2. **导入到 Vercel**
+   - 访问：https://vercel.com/new
+   - 选择你的 GitHub 仓库
+   - Framework Preset 自动识别为 "Astro"
+   - 点击 **"Deploy"**
+
+3. **配置环境变量**
+   
+   部署后，在 Vercel 项目设置中添加环境变量：
+   - Settings → Environment Variables
+   - 添加：
+     - `NOTION_TOKEN` = 你的 Notion Token
+     - `NOTION_GAMES_DB_ID` = 你的数据库 ID
+   - 点击 Save
+
+4. **重新部署**
+   - Deployments → 点击最新部署右侧的 `...` → Redeploy
+
+5. **完成！**
+   - 访问你的 Vercel 域名（如 `https://life-achievements.vercel.app`）
+   - 现在 Notion 更新后刷新网页即可看到最新数据！
+
+---
+
+## 🌐 备选：部署到 GitHub Pages（静态，需手动/定时构建）
 
 ### 方式一：部署到根域名（推荐）
 

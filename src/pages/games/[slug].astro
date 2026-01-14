@@ -1,0 +1,216 @@
+---
+// 游戏详情页 - 客户端实时渲染
+import Layout from '../../layouts/Layout.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const { slug } = Astro.params;
+
+// 不使用 getStaticPaths，让所有路径都动态生成
+export const prerender = false;
+---
+
+<Layout title="游戏详情">
+  <a href={`${base}/games`} class="back-link">← 返回游戏列表</a>
+
+  <div id="loading" style="text-align: center; color: var(--color-text-secondary); margin-top: 3rem;">
+    加载中...
+  </div>
+
+  <div id="error" style="display: none; text-align: center; color: #ef4444; margin-top: 3rem;"></div>
+
+  <article id="game-detail" class="detail-page" style="display: none;"></article>
+</Layout>
+
+<style>
+  .detail-page {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .detail-header {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .detail-cover {
+    width: 100%;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .detail-info h1 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .meta-label {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.25rem;
+  }
+
+  .meta-value {
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  .steam-link-section {
+    margin: 1rem 0;
+  }
+
+  .steam-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #1b2838 0%, #2a475e 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--radius);
+    font-weight: 500;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .steam-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(27, 40, 56, 0.4);
+    text-decoration: none;
+  }
+
+  .tags-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .detail-content {
+    line-height: 1.8;
+  }
+
+  .game-review h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  .game-review p {
+    margin-bottom: 1rem;
+    line-height: 1.8;
+    white-space: pre-wrap;
+  }
+
+  @media (max-width: 768px) {
+    .detail-header {
+      grid-template-columns: 1fr;
+    }
+
+    .detail-cover {
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .meta-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script define:vars={{ slug }}>
+  async function loadGame() {
+    try {
+      const response = await fetch(`/api/game/${slug}`);
+      if (!response.ok) {
+        throw new Error('Game not found');
+      }
+
+      const data = await response.json();
+      const game = data.game;
+
+      const gameDetail = document.getElementById('game-detail');
+      if (gameDetail) {
+        const stars = '⭐'.repeat(game.rating);
+        
+        gameDetail.innerHTML = `
+          <header class="detail-header">
+            ${game.cover ? `<img src="${game.cover}" alt="${game.title}" class="detail-cover" />` : ''}
+            <div class="detail-info">
+              <h1>
+                ${game.title}
+                ${game.favorite ? '<span class="favorite-badge">❤️ 最爱</span>' : ''}
+              </h1>
+              <div class="meta-grid">
+                <div class="meta-item">
+                  <span class="meta-label">平台</span>
+                  <span class="meta-value">${game.platform}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">状态</span>
+                  <span class="meta-value">${game.status}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">完成日期</span>
+                  <span class="meta-value">${game.completedDate}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">评分</span>
+                  <span class="meta-value">${stars}</span>
+                </div>
+              </div>
+              ${game.steamUrl ? `
+                <div class="steam-link-section">
+                  <a href="${game.steamUrl}" target="_blank" rel="noopener noreferrer" class="steam-link">
+                    🎮 在 Steam 上查看
+                  </a>
+                </div>
+              ` : ''}
+              <div class="tags-section">
+                ${game.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+              </div>
+            </div>
+          </header>
+
+          <div class="detail-content">
+            ${game.content ? `
+              <div class="game-review">
+                <h2>我的评价</h2>
+                <p>${game.content}</p>
+              </div>
+            ` : '<p style="color: var(--color-text-secondary);">暂无评价</p>'}
+          </div>
+        `;
+
+        // 更新页面标题
+        document.title = `${game.title} - 游戏清单`;
+        
+        gameDetail.style.display = 'block';
+      }
+
+      document.getElementById('loading')?.remove();
+    } catch (error) {
+      console.error('Error loading game:', error);
+      const errorDiv = document.getElementById('error');
+      if (errorDiv) {
+        errorDiv.textContent = '游戏未找到或加载失败';
+        errorDiv.style.display = 'block';
+      }
+      document.getElementById('loading')?.remove();
+    }
+  }
+
+  loadGame();
+</script>
+

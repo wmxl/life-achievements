@@ -1,0 +1,161 @@
+---
+// 游戏列表页 - 客户端实时渲染
+import Layout from '../layouts/Layout.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<Layout title="游戏清单">
+  <div class="page-header">
+    <h1>🎮 游戏清单</h1>
+    <div id="stats-summary" class="stats-summary">
+      <div class="stat-item">
+        <span class="stat-value">-</span>
+        <span class="stat-name">总游戏数</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">-</span>
+        <span class="stat-name">已完成</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">-</span>
+        <span class="stat-name">平均评分</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="loading" style="text-align: center; color: var(--color-text-secondary); margin-top: 3rem;">
+    加载中...
+  </div>
+
+  <div id="error" style="display: none; text-align: center; color: #ef4444; margin-top: 3rem;"></div>
+
+  <div id="games-grid" class="grid" style="display: none;"></div>
+</Layout>
+
+<style>
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .stats-summary {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--radius);
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--color-primary);
+  }
+
+  .stat-name {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin-top: 0.25rem;
+  }
+
+  @media (max-width: 768px) {
+    .stats-summary {
+      gap: 1rem;
+    }
+
+    .stat-item {
+      flex: 1 1 calc(50% - 0.5rem);
+      min-width: 100px;
+    }
+  }
+</style>
+
+<script define:vars={{ base }}>
+  async function loadGames() {
+    try {
+      const response = await fetch('/api/games');
+      if (!response.ok) {
+        throw new Error('Failed to fetch games');
+      }
+
+      const data = await response.json();
+      const games = data.games;
+
+      // 更新统计
+      const totalGames = games.length;
+      const completedGames = games.filter(g => g.status === '已完成').length;
+      const avgRating = totalGames > 0
+        ? (games.reduce((sum, game) => sum + game.rating, 0) / totalGames).toFixed(1)
+        : 0;
+
+      const statsDiv = document.getElementById('stats-summary');
+      if (statsDiv) {
+        statsDiv.innerHTML = `
+          <div class="stat-item">
+            <span class="stat-value">${totalGames}</span>
+            <span class="stat-name">总游戏数</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">${completedGames}</span>
+            <span class="stat-name">已完成</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">${avgRating} ⭐</span>
+            <span class="stat-name">平均评分</span>
+          </div>
+        `;
+      }
+
+      // 渲染游戏列表
+      const gamesGrid = document.getElementById('games-grid');
+      if (gamesGrid) {
+        if (games.length === 0) {
+          gamesGrid.innerHTML = '<p style="text-align: center; color: var(--color-text-secondary);">暂无游戏记录</p>';
+        } else {
+          gamesGrid.innerHTML = games.map(game => `
+            <a href="${base}/games/${game.slug}" class="card">
+              ${game.cover ? `<img src="${game.cover}" alt="${game.title}" class="card-cover" />` : ''}
+              <div class="card-content">
+                <h2>
+                  ${game.title}
+                  ${game.favorite ? '<span class="favorite-badge">❤️ 最爱</span>' : ''}
+                </h2>
+                <div class="card-rating">${'⭐'.repeat(game.rating)}</div>
+                <div class="card-meta">${game.platform} · ${game.status}</div>
+                <div class="card-meta">📅 ${game.completedDate}</div>
+                ${game.tags.length > 0 ? `
+                  <div class="card-tags">
+                    ${game.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                  </div>
+                ` : ''}
+              </div>
+            </a>
+          `).join('');
+        }
+        gamesGrid.style.display = 'grid';
+      }
+
+      document.getElementById('loading')?.remove();
+    } catch (error) {
+      console.error('Error loading games:', error);
+      const errorDiv = document.getElementById('error');
+      if (errorDiv) {
+        errorDiv.textContent = '加载失败，请刷新重试';
+        errorDiv.style.display = 'block';
+      }
+      document.getElementById('loading')?.remove();
+    }
+  }
+
+  // 页面加载时获取数据
+  loadGames();
+</script>
+

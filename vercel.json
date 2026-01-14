@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "astro",
+  "env": {
+    "NOTION_TOKEN": "@notion_token",
+    "NOTION_GAMES_DB_ID": "@notion_games_db_id"
+  }
+}
+

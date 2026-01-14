@@ -1,8 +1,10 @@
 import { defineConfig } from 'astro/config';
+import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://wmxl.github.io',
-  base: '/life-achievements',
-  outDir: './dist',
+  output: 'server',
+  adapter: vercel(),
+  site: 'https://life-achievements.vercel.app',
+  base: '/',
 });
