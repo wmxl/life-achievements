@@ -14,7 +14,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // 移除尾部斜杠�
         <a href={`${base}/`} class={currentPath === `${base}/` || currentPath === base ? 'active' : ''}>首页</a>
       </li>
       <li>
-        <a href={`${base}/games`} class={currentPath.includes('/games') ? 'active' : ''}>游戏</a>
+        <a href={`${base}/games-notion`} class={currentPath.includes('/games') ? 'active' : ''}>游戏</a>
       </li>
       <li>
         <a href={`${base}/movies`} class={currentPath.includes('/movies') ? 'active' : ''}>电影</a>

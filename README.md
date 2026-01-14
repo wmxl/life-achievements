@@ -4,18 +4,23 @@
 
 ## ✨ 特性
 
-- 📝 使用 Markdown + Front Matter 管理数据，便于阅读和版本控制
+- 📝 **双数据源支持**：
+  - Markdown + Front Matter（适合技术用户，版本控制）
+  - Notion 数据库（适合非技术用户，可视化编辑）
 - 🎨 简洁现代的 UI 设计，响应式布局
 - ⚡ 基于 Astro 的静态站点生成，速度快、性能优
 - 🚀 通过 GitHub Actions 自动部署到 GitHub Pages
 - 📊 自动统计和展示数据分析
 - 🏷️ 支持标签、评分、封面等丰富元数据
+- 🔄 可设置定时自动从 Notion 拉取最新数据
 
 ## 📦 技术栈
 
 - **框架**: [Astro](https://astro.build/) - 静态站点生成器
 - **语言**: TypeScript
-- **数据源**: Markdown + YAML Front Matter
+- **数据源**:
+  - Markdown + YAML Front Matter
+  - [Notion API](https://developers.notion.com/) (可选)
 - **部署**: GitHub Pages + GitHub Actions
 - **样式**: 原生 CSS（使用 CSS 变量）
 
@@ -38,7 +43,7 @@ npm install
 npm run dev
 ```
 
-访问 `http://localhost:4321` 查看网站。
+访问 `http://localhost:4321/life-achievements/games-notion` 查看游戏列表。
 
 ### 构建生产版本
 
@@ -67,6 +72,8 @@ life-achievements/
 │   │   ├── games/              # 游戏 Markdown 文件
 │   │   ├── movies/             # 电影 Markdown 文件
 │   │   └── books/              # 书籍 Markdown 文件
+│   ├── lib/
+│   │   └── notion.ts           # Notion API 集成模块
 │   ├── layouts/
 │   │   └── Layout.astro        # 基础页面布局
 │   ├── components/
@@ -74,8 +81,10 @@ life-achievements/
 │   │   └── Card.astro          # 卡片组件
 │   └── pages/
 │       ├── index.astro         # 首页
-│       ├── games.astro         # 游戏列表页
-│       ├── games/[slug].astro  # 游戏详情页
+│       ├── games.astro         # 游戏列表页 (Markdown)
+│       ├── games/[slug].astro  # 游戏详情页 (Markdown)
+│       ├── games-notion.astro  # 游戏列表页 (Notion)
+│       ├── games-notion/[slug].astro  # 游戏详情页 (Notion)
 │       ├── movies.astro        # 电影列表页
 │       ├── movies/[slug].astro # 电影详情页
 │       ├── books.astro         # 书籍列表页
@@ -87,37 +96,95 @@ life-achievements/
 └── package.json
 ```
 
-## 📝 如何添加内容
+## 📝 如何添加游戏
 
-### 添加游戏
+### 添加游戏的完整流程
 
-在 `src/content/games/` 目录下创建新的 `.md` 文件：
+**步骤 1：在 Notion 中添加游戏**
+1. 打开你的 Notion 游戏数据库
+2. 点击 **"+ New"** 或按 `Ctrl/Cmd + N`
+3. 填写游戏信息：
+   - **Name**: 游戏名称（必填）
+   - **平台**: 下拉选择 PC/Switch/PS5 等
+   - **评分**: 选择 ⭐~⭐⭐⭐⭐⭐
+   - **状态**: 选择 已完成/进行中/已放弃
+   - **完成日期**: 选择日期
+   - **标签**: 多选标签，如 RPG, 开放世界
+   - **最爱**: 勾选表示最爱 ❤️
+   - **Steam链接**: 粘贴 Steam URL（可选）
+   - **封面**: 上传图片（可选）
+   - **评价**: 写下你的游戏体验（可选）
+4. 保存
 
-```markdown
----
-title: "游戏名称"
-platform: "PC/Switch/PS5"
-rating: 5
-completedDate: "2024-01-01"
-status: "已完成"
-playTime: 50
-tags: [动作, 冒险, RPG]
-cover: "/images/game-cover.jpg"
-favorite: true
----
+**步骤 2：触发部署更新线上数据**
 
-## 我的评价
+有 3 种方式让线上网站同步 Notion 的新数据：
 
-在这里写下你的游戏体验和评价。
-
-## 难忘时刻
-
-- 列出游戏中的精彩瞬间
+**方式 A：推送空提交（手动触发）**
+```bash
+git commit --allow-empty -m "更新游戏数据"
+git push
 ```
+等待 2-5 分钟，GitHub Actions 会自动构建并部署。
+
+**方式 B：在 GitHub 手动触发**
+1. 访问：`https://github.com/你的用户名/life-achievements/actions`
+2. 点击 **"Deploy to GitHub Pages"** workflow
+3. 点击右侧 **"Run workflow"** 按钮
+4. 点击绿色的 **"Run workflow"** 确认
+
+**方式 C：自动定时部署（推荐，已配置）**
+
+✅ 已配置每天自动部署！每天早上 8 点自动从 Notion 拉取最新数据并更新网站。
+
+你只需在 Notion 中添加游戏，第二天早上就会自动同步到线上。
+
+**为什么本地能实时更新，线上需要重新部署？**
+- **本地**：`npm run dev` 每次刷新都调用 Notion API，获取最新数据
+- **线上**：静态网站，构建时生成 HTML 文件，内容固定，需要重新构建才能更新
+
+**步骤 3：查看更新**
+- 本地：刷新 `http://localhost:4321/life-achievements/games-notion`（实时）
+- 线上：等待部署完成后访问 `https://你的用户名.github.io/life-achievements/games-notion`
+
+---
+
+### Notion 数据库字段说明
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| Name | Title | ✅ | 游戏名称 |
+| 平台 | Select | ✅ | 游戏平台，选项：PC, Switch, PS5, PS4, Xbox |
+| 评分 | Select | ✅ | 评分，选项：⭐, ⭐⭐, ⭐⭐⭐, ⭐⭐⭐⭐, ⭐⭐⭐⭐⭐ |
+| 状态 | Select | ✅ | 游戏状态，选项：已完成, 进行中, 已放弃 |
+| 完成日期 | Date | ✅ | 完成或开始游玩的日期 |
+| 标签 | Multi-select | ❌ | 游戏标签，如：RPG, 开放世界, 动作 |
+| 最爱 | Checkbox | ❌ | 勾选表示这是你最爱的游戏 ❤️ |
+| Steam链接 | URL | ❌ | Steam 商店页面链接 |
+| 封面 | Files | ❌ | 游戏封面图片 |
+| 评价 | Rich Text | ❌ | 你的详细游戏评价和体验 |
+
+---
+
+### 首次配置 Notion 集成
+
+如果你还没有配置 Notion：
+
+1. **创建 Integration**: https://www.notion.so/my-integrations
+2. **创建游戏数据库**并添加上述字段
+3. **连接 Integration**: 数据库右上角 `•••` → "Add connections" → 选择你的 Integration
+4. **配置凭据**: 将 Token 和 Database ID 添加到 `.env` 文件
+5. **测试连接**: `npm run test:notion`
+6. **配置 GitHub Secrets**: 在仓库设置中添加 `NOTION_TOKEN` 和 `NOTION_GAMES_DB_ID`
+
+---
+
+## 📝 如何添加电影和书籍
 
 ### 添加电影
 
 在 `src/content/movies/` 目录下创建新的 `.md` 文件：
+
 
 ```markdown
 ---
@@ -136,9 +203,13 @@ favorite: true
 在这里写下你的观影体验。
 ```
 
-### 添加书籍
+## 📝 添加电影和书籍
 
-在 `src/content/books/` 目录下创建新的 `.md` 文件：
+目前电影和书籍使用 Markdown 文件管理。
+
+### 添加电影
+
+在 `src/content/movies/` 目录下创建新的 `.md` 文件：
 
 ```markdown
 ---

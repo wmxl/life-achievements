@@ -1,61 +1,55 @@
 ---
-// 游戏详情页（动态路由）
-import { getCollection } from 'astro:content';
-import type { CollectionEntry } from 'astro:content';
+// 游戏详情页 - 从 Notion 获取数据
 import Layout from '../../layouts/Layout.astro';
+import { getGamesFromNotion } from '../../lib/notion';
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // 移除尾部斜杠，统一处理
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 // 生成所有游戏的静态路径
 export async function getStaticPaths() {
-  const games = await getCollection('games');
+  const games = await getGamesFromNotion();
   return games.map(game => ({
     params: { slug: game.slug },
     props: { game },
   }));
 }
 
-interface Props {
-  game: CollectionEntry<'games'>;
-}
-
 const { game } = Astro.props;
-const { Content } = await game.render();
 
 // 生成星星评分
-const stars = '⭐'.repeat(game.data.rating);
+const stars = '⭐'.repeat(game.rating);
 ---
 
-<Layout title={game.data.title}>
-  <a href={`${base}/games`} class="back-link">← 返回游戏列表</a>
+<Layout title={game.title}>
+  <a href={`${base}/games-notion`} class="back-link">← 返回游戏列表</a>
 
   <article class="detail-page">
     <header class="detail-header">
-      {game.data.cover && (
-        <img src={game.data.cover} alt={game.data.title} class="detail-cover" />
+      {game.cover && (
+        <img src={game.cover} alt={game.title} class="detail-cover" />
       )}
       <div class="detail-info">
         <h1>
-          {game.data.title}
-          {game.data.favorite && <span class="favorite-badge">❤️ 最爱</span>}
+          {game.title}
+          {game.favorite && <span class="favorite-badge">❤️ 最爱</span>}
         </h1>
         <div class="meta-grid">
           <div class="meta-item">
             <span class="meta-label">平台</span>
-            <span class="meta-value">{game.data.platform}</span>
+            <span class="meta-value">{game.platform}</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">状态</span>
-            <span class="meta-value">{game.data.status}</span>
+            <span class="meta-value">{game.status}</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">完成日期</span>
-            <span class="meta-value">{game.data.completedDate}</span>
+            <span class="meta-value">{game.completedDate}</span>
           </div>
-          {game.data.playTime && (
+          {game.playTime && (
             <div class="meta-item">
               <span class="meta-label">游戏时长</span>
-              <span class="meta-value">{game.data.playTime} 小时</span>
+              <span class="meta-value">{game.playTime} 小时</span>
             </div>
           )}
           <div class="meta-item">
@@ -63,15 +57,15 @@ const stars = '⭐'.repeat(game.data.rating);
             <span class="meta-value">{stars}</span>
           </div>
         </div>
-        {game.data.steamUrl && (
+        {game.steamUrl && (
           <div class="steam-link-section">
-            <a href={game.data.steamUrl} target="_blank" rel="noopener noreferrer" class="steam-link">
+            <a href={game.steamUrl} target="_blank" rel="noopener noreferrer" class="steam-link">
               🎮 在 Steam 上查看
             </a>
           </div>
         )}
         <div class="tags-section">
-          {game.data.tags.map(tag => (
+          {game.tags.map(tag => (
             <span class="tag">{tag}</span>
           ))}
         </div>
@@ -79,7 +73,14 @@ const stars = '⭐'.repeat(game.data.rating);
     </header>
 
     <div class="detail-content">
-      <Content />
+      {game.content ? (
+        <div class="game-review">
+          <h2>我的评价</h2>
+          <p style="white-space: pre-wrap;">{game.content}</p>
+        </div>
+      ) : (
+        <p style="color: var(--color-text-secondary);">暂无评价</p>
+      )}
     </div>
   </article>
 </Layout>
@@ -163,20 +164,16 @@ const stars = '⭐'.repeat(game.data.rating);
     line-height: 1.8;
   }
 
-  .detail-content :global(h2) {
+  .game-review h2 {
     margin-top: 2rem;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 2px solid var(--color-border);
   }
 
-  .detail-content :global(ul) {
-    margin-left: 1.5rem;
+  .game-review p {
     margin-bottom: 1rem;
-  }
-
-  .detail-content :global(li) {
-    margin-bottom: 0.5rem;
+    line-height: 1.8;
   }
 
   @media (max-width: 768px) {
