@@ -78,7 +78,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   }
 </style>
 
-<script define:vars={{ base }}>
+<script is:inline define:vars={{ base }}>
   async function loadGames() {
     try {
       const response = await fetch('/api/games');

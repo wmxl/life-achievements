@@ -129,7 +129,7 @@ export const prerender = false;
   }
 </style>
 
-<script define:vars={{ slug }}>
+<script is:inline define:vars={{ slug }}>
   async function loadGame() {
     try {
       const response = await fetch(`/api/game/${slug}`);

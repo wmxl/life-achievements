@@ -98,7 +98,7 @@ export default async function handler(
         tags = properties['标签'].multi_select.map((tag: any) => tag.name);
       } else if (properties['标签']?.type === 'rich_text' && properties['标签'].rich_text.length > 0) {
         const tagsStr = properties['标签'].rich_text[0].plain_text;
-        tags = tagsStr.split(/[,，]/).map(t => t.trim()).filter(t => t);
+        tags = tagsStr.split(/[,，]/).map((t: string) => t.trim()).filter((t: string) => t);
       }
 
       // 提取 Steam 链接
