@@ -66,23 +66,21 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     margin-top: 0.25rem;
   }
 
-  .groups {
-    display: block;
-  }
-
   .group-section {
     margin-bottom: 3rem;
   }
 
-  .group-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
+  .group-title {
+    margin: 0 0 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text);
   }
 
-  .group-title {
-    margin: 0 0 1rem;
-    font-size: 1.25rem;
+  .group-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
   }
 
   @media (max-width: 768px) {
@@ -93,10 +91,6 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     .stat-item {
       flex: 1 1 calc(50% - 0.5rem);
       min-width: 100px;
-    }
-
-    .groups {
-      grid-template-columns: 1fr;
     }
 
     .group-grid {
@@ -179,21 +173,22 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
             `;
           };
 
-          const renderSection = (title, list) => `
-            <section class="group-section">
-              <h2 class="group-title">${title}</h2>
-              <div class="group-grid">
-                ${list.map(renderCard).join('')}
-              </div>
-            </section>
-          `;
+          const renderSection = (title, list) => {
+            if (list.length === 0) return '';
+            return `
+              <section class="group-section">
+                <h2 class="group-title">${title}</h2>
+                <div class="group-grid">
+                  ${list.map(renderCard).join('')}
+                </div>
+              </section>
+            `;
+          };
 
           gamesGrid.innerHTML = `
-            <div class="groups">
-              ${renderSection('进行中', inProgressGames)}
-              ${renderSection('未开始', notStartedGames)}
-              ${renderSection('已完成', completedGamesList)}
-            </div>
+            ${renderSection('进行中', inProgressGames)}
+            ${renderSection('未开始', notStartedGames)}
+            ${renderSection('已完成', completedGamesList)}
           `;
         }
         gamesGrid.style.display = 'block';
