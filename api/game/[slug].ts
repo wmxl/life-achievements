@@ -73,21 +73,23 @@ export default async function handler(
         rating = (ratingStr.match(/⭐/g) || []).length || 3;
       }
 
+      const startDate =
+        properties['开始日期']?.type === 'date'
+          ? properties['开始日期'].date?.start || undefined
+          : undefined;
+
       const completedDate =
         properties['完成日期']?.type === 'date'
-          ? properties['完成日期'].date?.start || new Date().toISOString().split('T')[0]
-          : new Date().toISOString().split('T')[0];
+          ? properties['完成日期'].date?.start || undefined
+          : undefined;
 
       let status = '进行中';
-      if (properties['状态']?.type === 'select') {
-        const statusStr = properties['状态'].select?.name;
-        if (statusStr === '已完成' || statusStr === '进行中' || statusStr === '已放弃') {
-          status = statusStr;
-        }
-      } else if (properties['状态']?.type === 'rich_text' && properties['状态'].rich_text.length > 0) {
-        const statusStr = properties['状态'].rich_text[0].plain_text;
-        if (statusStr === '已完成' || statusStr === '进行中' || statusStr === '已放弃') {
-          status = statusStr;
+      if (properties['完成状态']?.type === 'formula') {
+        const formulaValue = properties['完成状态'].formula;
+        if (formulaValue?.type === 'boolean') {
+          status = formulaValue.boolean ? '已完成' : '进行中';
+        } else if (formulaValue?.type === 'string' && formulaValue.string) {
+          status = formulaValue.string;
         }
       }
 
@@ -100,8 +102,8 @@ export default async function handler(
       }
 
       const steamUrl =
-        properties['Steam链接']?.type === 'url'
-          ? properties['Steam链接'].url || undefined
+        properties['链接']?.type === 'url'
+          ? properties['链接'].url || undefined
           : undefined;
 
       let cover: string | undefined;
@@ -134,6 +136,7 @@ export default async function handler(
         title,
         platform,
         rating,
+        startDate,
         completedDate,
         status,
         tags,

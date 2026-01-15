@@ -161,10 +161,18 @@ export const prerender = false;
                   <span class="meta-label">状态</span>
                   <span class="meta-value">${game.status}</span>
                 </div>
-                <div class="meta-item">
-                  <span class="meta-label">完成日期</span>
-                  <span class="meta-value">${game.completedDate}</span>
-                </div>
+                ${game.startDate ? `
+                  <div class="meta-item">
+                    <span class="meta-label">开始日期</span>
+                    <span class="meta-value">${game.startDate}</span>
+                  </div>
+                ` : ''}
+                ${game.completedDate ? `
+                  <div class="meta-item">
+                    <span class="meta-label">完成日期</span>
+                    <span class="meta-value">${game.completedDate}</span>
+                  </div>
+                ` : ''}
                 <div class="meta-item">
                   <span class="meta-label">评分</span>
                   <span class="meta-value">${stars}</span>
@@ -173,7 +181,7 @@ export const prerender = false;
               ${game.steamUrl ? `
                 <div class="steam-link-section">
                   <a href="${game.steamUrl}" target="_blank" rel="noopener noreferrer" class="steam-link">
-                    🎮 在 Steam 上查看
+                    🔗 查看链接
                   </a>
                 </div>
               ` : ''}

@@ -120,7 +120,12 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         if (games.length === 0) {
           gamesGrid.innerHTML = '<p style="text-align: center; color: var(--color-text-secondary);">暂无游戏记录</p>';
         } else {
-          gamesGrid.innerHTML = games.map(game => `
+          gamesGrid.innerHTML = games.map(game => {
+            const dateLabel = game.completedDate
+              ? `📅 完成: ${game.completedDate}`
+              : (game.startDate ? `📅 开始: ${game.startDate}` : '');
+
+            return `
             <a href="${base}/games/${game.slug}" class="card">
               ${game.cover ? `<img src="${game.cover}" alt="${game.title}" class="card-cover" />` : ''}
               <div class="card-content">
@@ -130,7 +135,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
                 </h2>
                 <div class="card-rating">${'⭐'.repeat(game.rating)}</div>
                 <div class="card-meta">${game.platform} · ${game.status}</div>
-                <div class="card-meta">📅 ${game.completedDate}</div>
+                ${dateLabel ? `<div class="card-meta">${dateLabel}</div>` : ''}
                 ${game.tags.length > 0 ? `
                   <div class="card-tags">
                     ${game.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
@@ -138,7 +143,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
                 ` : ''}
               </div>
             </a>
-          `).join('');
+          `}).join('');
         }
         gamesGrid.style.display = 'grid';
       }
