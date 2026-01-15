@@ -1,0 +1,239 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="打卡历史">
+  <div class="history-container">
+    <h1>📜 打卡历史</h1>
+
+    <div class="button-group">
+      <a href="/todo" class="btn-primary">← 返回今日打卡</a>
+    </div>
+
+    <div class="loading" id="loading">加载中...</div>
+
+    <div class="history-list" id="historyList" style="display: none;"></div>
+
+    <div class="error-message" id="errorMessage" style="display: none;"></div>
+  </div>
+</Layout>
+
+<script>
+  // 格式化日期显示
+  function formatDateDisplay(dateStr: string) {
+    const date = new Date(dateStr);
+    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    const weekday = weekdays[date.getDay()];
+    return `${dateStr} ${weekday}`;
+  }
+
+  // 加载历史记录
+  async function loadHistory() {
+    const loading = document.getElementById('loading');
+    const historyList = document.getElementById('historyList');
+    const errorMessage = document.getElementById('errorMessage');
+
+    try {
+      const response = await fetch('/api/todo-history?limit=30');
+      const data = await response.json();
+
+      if (loading) loading.style.display = 'none';
+      if (historyList) historyList.style.display = 'block';
+
+      if (data && data.length > 0) {
+        historyList!.innerHTML = data.map((todo: any) => `
+          <div class="history-item">
+            <div class="history-header">
+              <h3>${formatDateDisplay(todo.date)}</h3>
+              ${todo.weight ? `<span class="weight-badge">⚖️ ${todo.weight} kg</span>` : ''}
+            </div>
+
+            ${todo.remark ? `<p class="remark">${todo.remark}</p>` : ''}
+
+            <div class="checklist">
+              <div class="check-item ${todo.momo ? 'checked' : ''}">
+                <span class="icon">${todo.momo ? '✅' : '⬜'}</span>
+                <span>墨墨背单词</span>
+              </div>
+              <div class="check-item ${todo.pushup ? 'checked' : ''}">
+                <span class="icon">${todo.pushup ? '✅' : '⬜'}</span>
+                <span>俯卧撑一组</span>
+              </div>
+              <div class="check-item ${todo.squat ? 'checked' : ''}">
+                <span class="icon">${todo.squat ? '✅' : '⬜'}</span>
+                <span>深蹲一组</span>
+              </div>
+              <div class="check-item ${todo.pullup ? 'checked' : ''}">
+                <span class="icon">${todo.pullup ? '✅' : '⬜'}</span>
+                <span>抓杠 3 次</span>
+              </div>
+              <div class="check-item ${todo.standing ? 'checked' : ''}">
+                <span class="icon">${todo.standing ? '✅' : '⬜'}</span>
+                <span>站桩</span>
+              </div>
+            </div>
+
+            <div class="completion-rate">
+              完成率: ${calculateCompletionRate(todo)}%
+            </div>
+          </div>
+        `).join('');
+      } else {
+        historyList!.innerHTML = '<p class="empty-message">暂无历史记录</p>';
+      }
+    } catch (error) {
+      console.error('加载历史记录失败:', error);
+      if (loading) loading.style.display = 'none';
+      if (errorMessage) {
+        errorMessage.textContent = '加载历史记录失败，请刷新页面重试';
+        errorMessage.style.display = 'block';
+      }
+    }
+  }
+
+  // 计算完成率
+  function calculateCompletionRate(todo: any) {
+    const total = 5;
+    const completed = [todo.momo, todo.pushup, todo.squat, todo.pullup, todo.standing]
+      .filter(Boolean).length;
+    return Math.round((completed / total) * 100);
+  }
+
+  // 页面加载时执行
+  document.addEventListener('DOMContentLoaded', () => {
+    loadHistory();
+  });
+</script>
+
+<style>
+  .history-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  h1 {
+    color: var(--color-text);
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+  }
+
+  .button-group {
+    margin-bottom: 2rem;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: #2563eb;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-text-secondary);
+  }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .history-item {
+    background: var(--color-bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    border-left: 4px solid var(--color-primary);
+  }
+
+  .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .history-header h3 {
+    color: var(--color-text);
+    font-size: 1.2rem;
+    margin: 0;
+  }
+
+  .weight-badge {
+    background: var(--color-primary);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .remark {
+    color: var(--color-text-secondary);
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: white;
+    border-radius: var(--radius);
+    font-style: italic;
+  }
+
+  .checklist {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    background: white;
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+  }
+
+  .check-item.checked {
+    color: #059669;
+  }
+
+  .check-item .icon {
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
+  }
+
+  .completion-rate {
+    text-align: right;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .empty-message {
+    text-align: center;
+    color: var(--color-text-secondary);
+    padding: 3rem;
+    font-size: 1.1rem;
+  }
+
+  .error-message {
+    padding: 1rem;
+    border-radius: var(--radius);
+    margin-top: 1rem;
+    text-align: center;
+    background: #fee;
+    color: #c00;
+  }
+</style>

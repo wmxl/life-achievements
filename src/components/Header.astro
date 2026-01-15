@@ -25,6 +25,9 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // 移除尾部斜杠�
       <li>
         <a href={`${base}/books`} class={currentPath.includes('/books') ? 'active' : ''}>书</a>
       </li>
+      <li>
+        <a href={`${base}/todo`} class={currentPath.includes('/todo') ? 'active' : ''}>打卡</a>
+      </li>
     </ul>
   </nav>
 </header>
