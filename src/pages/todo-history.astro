@@ -73,9 +73,6 @@ import Layout from '../layouts/Layout.astro';
               </div>
             </div>
 
-            <div class="completion-rate">
-              完成率: ${calculateCompletionRate(todo)}%
-            </div>
           </div>
         `).join('');
       } else {
@@ -89,14 +86,6 @@ import Layout from '../layouts/Layout.astro';
         errorMessage.style.display = 'block';
       }
     }
-  }
-
-  // 计算完成率
-  function calculateCompletionRate(todo: any) {
-    const total = 5;
-    const completed = [todo.momo, todo.pushup, todo.squat, todo.pullup, todo.standing]
-      .filter(Boolean).length;
-    return Math.round((completed / total) * 100);
   }
 
   // 页面加载时执行
@@ -212,13 +201,6 @@ import Layout from '../layouts/Layout.astro';
   .check-item .icon {
     margin-right: 0.5rem;
     font-size: 1.1rem;
-  }
-
-  .completion-rate {
-    text-align: right;
-    color: var(--color-text-secondary);
-    font-weight: 600;
-    font-size: 0.9rem;
   }
 
   .empty-message {
