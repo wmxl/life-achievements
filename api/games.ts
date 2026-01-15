@@ -41,7 +41,7 @@ export default async function handler(
     }
 
     const data = await response.json();
-    const games: any[] = [];
+    const games = [];
 
     for (const page of data.results) {
       if (!('properties' in page)) continue;
