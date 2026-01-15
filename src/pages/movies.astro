@@ -1,39 +1,67 @@
 ---
-// 电影列表页 - 客户端实时渲染
+// 电影列表页
+import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
+import Card from '../components/Card.astro';
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // 移除尾部斜杠，统一处理
+
+// 获取所有电影并按观看日期排序
+const movies = await getCollection('movies');
+const sortedMovies = [...movies].sort((a, b) =>
+  new Date(b.data.watchDate).getTime() - new Date(a.data.watchDate).getTime()
+);
+
+// 计算统计信息
+const totalMovies = movies.length;
+const avgRating = totalMovies > 0
+  ? (movies.reduce((sum, movie) => sum + movie.data.rating, 0) / totalMovies).toFixed(1)
+  : 0;
+const favoriteCount = movies.filter(m => m.data.favorite).length;
 ---
 
 <Layout title="电影清单">
   <div class="page-header">
     <h1>🎬 电影清单</h1>
-    <div id="stats-summary" class="stats-summary">
+    <div class="stats-summary">
       <div class="stat-item">
-        <span class="stat-value">-</span>
+        <span class="stat-value">{totalMovies}</span>
         <span class="stat-name">总电影数</span>
       </div>
       <div class="stat-item">
-        <span class="stat-value">-</span>
+        <span class="stat-value">{avgRating} ⭐</span>
         <span class="stat-name">平均评分</span>
       </div>
       <div class="stat-item">
-        <span class="stat-value">-</span>
+        <span class="stat-value">{favoriteCount}</span>
         <span class="stat-name">最爱电影</span>
       </div>
     </div>
   </div>
 
-  <div id="loading" style="text-align: center; color: var(--color-text-secondary); margin-top: 3rem;">
-    加载中...
-  </div>
-
-  <div id="error" style="display: none; text-align: center; color: #ef4444; margin-top: 3rem;"></div>
-
-  <div id="movies-grid" class="grid" style="display: none;"></div>
+  {sortedMovies.length === 0 ? (
+    <p style="text-align: center; color: var(--color-text-secondary); margin-top: 3rem;">
+      暂无电影记录，快去添加你的第一部电影吧！
+    </p>
+  ) : (
+    <div class="grid">
+      {sortedMovies.map(movie => (
+        <Card
+          title={movie.data.title}
+          rating={movie.data.rating}
+          date={movie.data.watchDate}
+          tags={movie.data.tags}
+          href={`${base}/movies/${movie.slug}`}
+          cover={movie.data.cover}
+          favorite={movie.data.favorite}
+          meta={`${movie.data.director} · ${movie.data.year}`}
+        />
+      ))}
+    </div>
+  )}
 </Layout>
 
-<style is:global>
+<style>
   .page-header {
     margin-bottom: 2rem;
   }
@@ -66,146 +94,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     margin-top: 0.25rem;
   }
 
-  .group-section {
-    margin-bottom: 3rem;
-  }
-
-  .group-title {
-    margin: 0 0 1.5rem;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--color-text);
-  }
-
-  .group-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 1rem;
-  }
-
   @media (max-width: 768px) {
     .stats-summary {
       gap: 1rem;
-    }
-
-    .stat-item {
-      flex: 1 1 calc(50% - 0.5rem);
-      min-width: 100px;
-    }
-
-    .group-grid {
-      grid-template-columns: 1fr;
+      justify-content: center;
     }
   }
 </style>
-
-<script is:inline define:vars={{ base }}>
-  async function loadMovies() {
-    try {
-      const response = await fetch('/api/movies');
-      if (!response.ok) {
-        throw new Error('Failed to fetch movies');
-      }
-
-      const data = await response.json();
-      const movies = data.movies;
-
-      // 更新统计
-      const totalMovies = movies.length;
-      const completedMovies = movies.filter(m => m.completedDate).length;
-      const avgRating = totalMovies > 0
-        ? (movies.reduce((sum, movie) => sum + movie.rating, 0) / totalMovies).toFixed(1)
-        : 0;
-
-      const statsDiv = document.getElementById('stats-summary');
-      if (statsDiv) {
-        statsDiv.innerHTML = `
-          <div class="stat-item">
-            <span class="stat-value">${totalMovies}</span>
-            <span class="stat-name">总电影数</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-value">${completedMovies}</span>
-            <span class="stat-name">已完成</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-value">${avgRating} ⭐</span>
-            <span class="stat-name">平均评分</span>
-          </div>
-        `;
-      }
-
-      // 分组
-      const inProgressMovies = movies.filter(m => m.startDate && !m.completedDate);
-      const notStartedMovies = movies.filter(m => !m.startDate && !m.completedDate);
-      const completedMoviesList = movies.filter(m => m.completedDate);
-
-      // 渲染电影列表
-      const moviesGrid = document.getElementById('movies-grid');
-      if (moviesGrid) {
-        if (movies.length === 0) {
-          moviesGrid.innerHTML = '<p style="text-align: center; color: var(--color-text-secondary);">暂无电影记录</p>';
-        } else {
-          const renderCard = (movie) => {
-            const dateLines = [
-              movie.startDate ? `开始: ${movie.startDate}` : '',
-              movie.completedDate ? `完成: ${movie.completedDate}` : '',
-            ].filter(Boolean);
-
-            return `
-              <a href="${base}/movies/${movie.slug}" class="card">
-                ${movie.cover ? `<img src="${movie.cover}" alt="${movie.title}" class="card-cover" />` : ''}
-                <div class="card-content">
-                  <h2>
-                    ${movie.title || '未命名'}
-                    ${movie.favorite ? '<span class="favorite-badge">❤️ 最爱</span>' : ''}
-                  </h2>
-                  <div class="card-rating">${'⭐'.repeat(movie.rating || 0)}</div>
-                  ${movie.status ? `<div class="card-meta">${movie.status}</div>` : ''}
-                  ${dateLines.length > 0 ? `<div class="card-meta">📅 ${dateLines.join(' · ')}</div>` : ''}
-                  ${movie.tags && movie.tags.length > 0 ? `
-                    <div class="card-tags">
-                      ${movie.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                    </div>
-                  ` : ''}
-                </div>
-              </a>
-            `;
-          };
-
-          const renderSection = (title, list) => {
-            if (list.length === 0) return '';
-            return `
-              <section class="group-section">
-                <h2 class="group-title">${title}</h2>
-                <div class="group-grid">
-                  ${list.map(renderCard).join('')}
-                </div>
-              </section>
-            `;
-          };
-
-          moviesGrid.innerHTML = `
-            ${renderSection('进行中', inProgressMovies)}
-            ${renderSection('未开始', notStartedMovies)}
-            ${renderSection('已完成', completedMoviesList)}
-          `;
-        }
-        moviesGrid.style.display = 'block';
-      }
-
-      document.getElementById('loading')?.remove();
-    } catch (error) {
-      console.error('Error loading movies:', error);
-      const errorDiv = document.getElementById('error');
-      if (errorDiv) {
-        errorDiv.textContent = '加载失败，请刷新重试。错误: ' + (error.message || error);
-        errorDiv.style.display = 'block';
-      }
-      document.getElementById('loading')?.remove();
-    }
-  }
-
-  // 页面加载时获取数据
-  loadMovies();
-</script>
