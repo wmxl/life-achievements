@@ -72,6 +72,12 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     gap: 2rem;
   }
 
+  .group-section .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
   .group-title {
     margin: 0 0 1rem;
     font-size: 1.25rem;
