@@ -1,39 +1,8 @@
 ---
-// 首页 - 展示统计和最新内容
-import { getCollection } from 'astro:content';
+// 首页 - 展示统计和最新内容（客户端实时渲染）
 import Layout from '../layouts/Layout.astro';
-import Card from '../components/Card.astro';
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // 移除尾部斜杠，统一处理
-
-// 获取所有集合
-const games = await getCollection('games');
-const movies = await getCollection('movies');
-const books = await getCollection('books');
-
-// 计算平均评分
-const avgGameRating = games.length > 0
-  ? (games.reduce((sum, g) => sum + g.data.rating, 0) / games.length).toFixed(1)
-  : 0;
-const avgMovieRating = movies.length > 0
-  ? (movies.reduce((sum, m) => sum + m.data.rating, 0) / movies.length).toFixed(1)
-  : 0;
-const avgBookRating = books.length > 0
-  ? (books.reduce((sum, b) => sum + b.data.rating, 0) / books.length).toFixed(1)
-  : 0;
-
-// 获取最新内容（各取前 3 项）
-const recentGames = [...games]
-  .sort((a, b) => new Date(b.data.completedDate).getTime() - new Date(a.data.completedDate).getTime())
-  .slice(0, 3);
-
-const recentMovies = [...movies]
-  .sort((a, b) => new Date(b.data.watchDate).getTime() - new Date(a.data.watchDate).getTime())
-  .slice(0, 3);
-
-const recentBooks = [...books]
-  .sort((a, b) => new Date(b.data.readDate).getTime() - new Date(a.data.readDate).getTime())
-  .slice(0, 3);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 
 <Layout title="首页">
@@ -42,113 +11,78 @@ const recentBooks = [...books]
     <p class="hero-subtitle">记录玩过的游戏、看过的电影、读过的书籍</p>
   </div>
 
+  <!-- 加载状态 -->
+  <div id="loading" style="text-align: center; color: var(--color-text-secondary); margin-top: 3rem;">
+    加载中...
+  </div>
+
   <!-- 统计卡片 -->
-  <div class="stats">
+  <div id="stats" class="stats" style="display: none;">
     <div class="stat-card">
-      <span class="stat-number">{games.length}</span>
+      <span class="stat-icon">🎮</span>
+      <span class="stat-number" id="games-total">-</span>
       <span class="stat-label">游戏</span>
-      <div style="margin-top: 0.5rem; font-size: 0.9rem;">
-        平均评分: {avgGameRating} ⭐
+      <div class="stat-detail">
+        <span id="games-completed">-</span> 已完成 · <span id="games-rating">-</span> ⭐
       </div>
     </div>
     <div class="stat-card">
-      <span class="stat-number">{movies.length}</span>
+      <span class="stat-icon">🎬</span>
+      <span class="stat-number" id="movies-total">-</span>
       <span class="stat-label">电影</span>
-      <div style="margin-top: 0.5rem; font-size: 0.9rem;">
-        平均评分: {avgMovieRating} ⭐
+      <div class="stat-detail">
+        <span id="movies-completed">-</span> 已完成 · <span id="movies-rating">-</span> ⭐
       </div>
     </div>
     <div class="stat-card">
-      <span class="stat-number">{books.length}</span>
+      <span class="stat-icon">📚</span>
+      <span class="stat-number" id="books-total">-</span>
       <span class="stat-label">书籍</span>
-      <div style="margin-top: 0.5rem; font-size: 0.9rem;">
-        平均评分: {avgBookRating} ⭐
+      <div class="stat-detail">
+        <span id="books-completed">-</span> 已完成 · <span id="books-rating">-</span> ⭐
       </div>
     </div>
   </div>
 
-  <!-- 最近游戏 -->
-  {recentGames.length > 0 && (
-    <section>
-      <h2>🎮 最近游戏</h2>
-      <div class="grid">
-        {recentGames.map(game => (
-          <Card
-            title={game.data.title}
-            rating={game.data.rating}
-            date={game.data.completedDate}
-            tags={game.data.tags}
-            href={`${base}/games/${game.slug}`}
-            cover={game.data.cover}
-            favorite={game.data.favorite}
-            meta={`${game.data.platform} · ${game.data.status}`}
-          />
-        ))}
-      </div>
-      <div style="text-align: center; margin-top: 2rem;">
-        <a href={`${base}/games`} class="view-all-link">查看全部游戏 →</a>
-      </div>
-    </section>
-  )}
+  <!-- 最近完成 -->
+  <section id="recent-section" style="display: none; margin-top: 3rem;">
+    <h2>✨ 最近完成</h2>
+    <div id="recent-grid" class="recent-grid"></div>
+  </section>
 
-  <!-- 最近电影 -->
-  {recentMovies.length > 0 && (
-    <section style="margin-top: 3rem;">
-      <h2>🎬 最近电影</h2>
-      <div class="grid">
-        {recentMovies.map(movie => (
-          <Card
-            title={movie.data.title}
-            rating={movie.data.rating}
-            date={movie.data.watchDate}
-            tags={movie.data.tags}
-            href={`${base}/movies/${movie.slug}`}
-            cover={movie.data.cover}
-            favorite={movie.data.favorite}
-            meta={`${movie.data.director} · ${movie.data.year}`}
-          />
-        ))}
-      </div>
-      <div style="text-align: center; margin-top: 2rem;">
-        <a href={`${base}/movies`} class="view-all-link">查看全部电影 →</a>
-      </div>
-    </section>
-  )}
-
-  <!-- 最近书籍 -->
-  {recentBooks.length > 0 && (
-    <section style="margin-top: 3rem;">
-      <h2>📚 最近书籍</h2>
-      <div class="grid">
-        {recentBooks.map(book => (
-          <Card
-            title={book.data.title}
-            rating={book.data.rating}
-            date={book.data.readDate}
-            tags={book.data.tags}
-            href={`${base}/books/${book.slug}`}
-            cover={book.data.cover}
-            favorite={book.data.favorite}
-            meta={book.data.author}
-          />
-        ))}
-      </div>
-      <div style="text-align: center; margin-top: 2rem;">
-        <a href={`${base}/books`} class="view-all-link">查看全部书籍 →</a>
-      </div>
-    </section>
-  )}
+  <!-- 快捷入口 -->
+  <section style="margin-top: 3rem;">
+    <div class="quick-links">
+      <a href={`${base}/games`} class="quick-link">
+        <span class="quick-link-icon">🎮</span>
+        <span class="quick-link-text">浏览游戏</span>
+      </a>
+      <a href={`${base}/movies`} class="quick-link">
+        <span class="quick-link-icon">🎬</span>
+        <span class="quick-link-text">浏览电影</span>
+      </a>
+      <a href={`${base}/books`} class="quick-link">
+        <span class="quick-link-icon">📚</span>
+        <span class="quick-link-text">浏览书籍</span>
+      </a>
+    </div>
+  </section>
 </Layout>
 
-<style>
+<style is:global>
   .hero {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
+    padding: 2rem 0;
   }
 
   .hero h1 {
     font-size: 3rem;
     margin-bottom: 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .hero-subtitle {
@@ -156,25 +90,153 @@ const recentBooks = [...books]
     color: var(--color-text-secondary);
   }
 
-  .view-all-link {
-    display: inline-block;
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: var(--color-primary);
-    padding: 0.75rem 1.5rem;
-    border: 2px solid var(--color-primary);
-    border-radius: var(--radius);
-    transition: background-color 0.2s, color 0.2s;
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
   }
 
-  .view-all-link:hover {
-    background-color: var(--color-primary);
+  .stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    padding: 2rem;
+    border-radius: var(--radius);
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .stat-card:nth-child(2) {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+
+  .stat-card:nth-child(3) {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
+
+  .stat-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-number {
+    font-size: 3rem;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-label {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-detail {
+    font-size: 0.9rem;
+    opacity: 0.85;
+  }
+
+  .recent-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+
+  .recent-card {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .recent-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     text-decoration: none;
   }
 
-  section {
-    margin-top: 3rem;
+  .recent-card-type {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .recent-card-cover {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin-bottom: 0.75rem;
+  }
+
+  .recent-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 0.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .recent-card-rating {
+    font-size: 1rem;
+    color: #f59e0b;
+    margin-bottom: 0.5rem;
+  }
+
+  .recent-card-date {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .quick-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .quick-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    background-color: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius);
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .quick-link:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  }
+
+  .quick-link-icon {
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .quick-link-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text);
   }
 
   @media (max-width: 768px) {
@@ -185,5 +247,119 @@ const recentBooks = [...books]
     .hero-subtitle {
       font-size: 1rem;
     }
+
+    .stats {
+      grid-template-columns: 1fr;
+    }
+
+    .stat-icon {
+      font-size: 2.5rem;
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+    }
+
+    .recent-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
+
+<script is:inline define:vars={{ base }}>
+  async function loadHomePage() {
+    try {
+      // 并行获取所有数据
+      const [gamesRes, moviesRes, booksRes] = await Promise.all([
+        fetch('/api/games'),
+        fetch('/api/movies'),
+        fetch('/api/books')
+      ]);
+
+      if (!gamesRes.ok || !moviesRes.ok || !booksRes.ok) {
+        throw new Error('Failed to fetch data');
+      }
+
+      const [gamesData, moviesData, booksData] = await Promise.all([
+        gamesRes.json(),
+        moviesRes.json(),
+        booksRes.json()
+      ]);
+
+      const games = gamesData.games;
+      const movies = moviesData.movies;
+      const books = booksData.books;
+
+      // 更新统计数据
+      const gamesCompleted = games.filter(g => g.completedDate).length;
+      const moviesCompleted = movies.filter(m => m.completedDate).length;
+      const booksCompleted = books.filter(b => b.completedDate).length;
+
+      const gamesRating = games.length > 0
+        ? (games.reduce((sum, g) => sum + g.rating, 0) / games.length).toFixed(1)
+        : 0;
+      const moviesRating = movies.length > 0
+        ? (movies.reduce((sum, m) => sum + m.rating, 0) / movies.length).toFixed(1)
+        : 0;
+      const booksRating = books.length > 0
+        ? (books.reduce((sum, b) => sum + b.rating, 0) / books.length).toFixed(1)
+        : 0;
+
+      document.getElementById('games-total').textContent = games.length;
+      document.getElementById('games-completed').textContent = gamesCompleted;
+      document.getElementById('games-rating').textContent = gamesRating;
+
+      document.getElementById('movies-total').textContent = movies.length;
+      document.getElementById('movies-completed').textContent = moviesCompleted;
+      document.getElementById('movies-rating').textContent = moviesRating;
+
+      document.getElementById('books-total').textContent = books.length;
+      document.getElementById('books-completed').textContent = booksCompleted;
+      document.getElementById('books-rating').textContent = booksRating;
+
+      // 显示统计卡片
+      document.getElementById('stats').style.display = 'grid';
+
+      // 合并所有已完成的内容并按完成日期排序
+      const allCompleted = [
+        ...games.filter(g => g.completedDate).map(g => ({ ...g, type: 'game', icon: '🎮', url: `/games/${g.slug}` })),
+        ...movies.filter(m => m.completedDate).map(m => ({ ...m, type: 'movie', icon: '🎬', url: `/movies/${m.slug}` })),
+        ...books.filter(b => b.completedDate).map(b => ({ ...b, type: 'book', icon: '📚', url: `/books/${b.slug}` }))
+      ].sort((a, b) => new Date(b.completedDate) - new Date(a.completedDate));
+
+      // 取前 6 个
+      const recentItems = allCompleted.slice(0, 6);
+
+      // 渲染最近完成的内容
+      if (recentItems.length > 0) {
+        const recentGrid = document.getElementById('recent-grid');
+        const typeLabels = {
+          game: '游戏',
+          movie: '电影',
+          book: '书籍'
+        };
+
+        recentGrid.innerHTML = recentItems.map(item => `
+          <a href="${base}${item.url}" class="recent-card">
+            <div class="recent-card-type">${item.icon} ${typeLabels[item.type]}</div>
+            ${item.cover ? `<img src="${item.cover}" alt="${item.title}" class="recent-card-cover" />` : ''}
+            <div class="recent-card-title">${item.title}</div>
+            <div class="recent-card-rating">${'⭐'.repeat(item.rating)}</div>
+            <div class="recent-card-date">完成: ${item.completedDate}</div>
+          </a>
+        `).join('');
+
+        document.getElementById('recent-section').style.display = 'block';
+      }
+
+      // 隐藏加载状态
+      document.getElementById('loading').remove();
+    } catch (error) {
+      console.error('Error loading home page:', error);
+      document.getElementById('loading').innerHTML = '<p style="color: #ef4444;">加载失败，请刷新重试</p>';
+    }
+  }
+
+  // 页面加载时获取数据
+  loadHomePage();
+</script>
