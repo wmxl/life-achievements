@@ -66,6 +66,23 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     margin-top: 0.25rem;
   }
 
+  .group-section {
+    margin-bottom: 3rem;
+  }
+
+  .group-title {
+    margin: 0 0 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .group-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+
   @media (max-width: 768px) {
     .stats-summary {
       gap: 1rem;
@@ -74,6 +91,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     .stat-item {
       flex: 1 1 calc(50% - 0.5rem);
       min-width: 100px;
+    }
+
+    .group-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>
@@ -91,10 +112,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
       // 更新统计
       const totalBooks = books.length;
+      const completedBooks = books.filter(b => b.completedDate).length;
       const avgRating = totalBooks > 0
         ? (books.reduce((sum, book) => sum + book.rating, 0) / totalBooks).toFixed(1)
         : 0;
-      const favoriteCount = books.filter(b => b.favorite).length;
 
       const statsDiv = document.getElementById('stats-summary');
       if (statsDiv) {
@@ -104,15 +125,20 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
             <span class="stat-name">总书籍数</span>
           </div>
           <div class="stat-item">
+            <span class="stat-value">${completedBooks}</span>
+            <span class="stat-name">已完成</span>
+          </div>
+          <div class="stat-item">
             <span class="stat-value">${avgRating} ⭐</span>
             <span class="stat-name">平均评分</span>
           </div>
-          <div class="stat-item">
-            <span class="stat-value">${favoriteCount}</span>
-            <span class="stat-name">最爱书籍</span>
-          </div>
         `;
       }
+
+      // 分组
+      const inProgressBooks = books.filter(b => b.startDate && !b.completedDate);
+      const notStartedBooks = books.filter(b => !b.startDate && !b.completedDate);
+      const completedBooksList = books.filter(b => b.completedDate);
 
       // 渲染书籍列表
       const booksGrid = document.getElementById('books-grid');
@@ -121,6 +147,11 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
           booksGrid.innerHTML = '<p style="text-align: center; color: var(--color-text-secondary);">暂无书籍记录</p>';
         } else {
           const renderCard = (book) => {
+            const dateLines = [
+              book.startDate ? `开始: ${book.startDate}` : '',
+              book.completedDate ? `完成: ${book.completedDate}` : '',
+            ].filter(Boolean);
+
             return `
               <a href="${base}/books/${book.slug}" class="card">
                 ${book.cover ? `<img src="${book.cover}" alt="${book.title}" class="card-cover" />` : ''}
@@ -130,8 +161,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
                     ${book.favorite ? '<span class="favorite-badge">❤️ 最爱</span>' : ''}
                   </h2>
                   <div class="card-rating">${'⭐'.repeat(book.rating)}</div>
-                  <div class="card-meta">${book.author}</div>
-                  ${book.readDate ? `<div class="card-meta">📅 阅读: ${book.readDate}</div>` : ''}
+                  <div class="card-meta">${book.status}</div>
+                  ${dateLines.length > 0 ? `<div class="card-meta">📅 ${dateLines.join(' · ')}</div>` : ''}
                   ${book.tags.length > 0 ? `
                     <div class="card-tags">
                       ${book.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
@@ -142,9 +173,25 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
             `;
           };
 
-          booksGrid.innerHTML = books.map(renderCard).join('');
+          const renderSection = (title, list) => {
+            if (list.length === 0) return '';
+            return `
+              <section class="group-section">
+                <h2 class="group-title">${title}</h2>
+                <div class="group-grid">
+                  ${list.map(renderCard).join('')}
+                </div>
+              </section>
+            `;
+          };
+
+          booksGrid.innerHTML = `
+            ${renderSection('进行中', inProgressBooks)}
+            ${renderSection('未开始', notStartedBooks)}
+            ${renderSection('已完成', completedBooksList)}
+          `;
         }
-        booksGrid.style.display = 'grid';
+        booksGrid.style.display = 'block';
       }
 
       document.getElementById('loading')?.remove();

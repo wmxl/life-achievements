@@ -26,7 +26,7 @@ export default async function handler(
         body: JSON.stringify({
           sorts: [
             {
-              property: '阅读日期',
+              property: '完成日期',
               direction: 'descending',
             },
           ],
@@ -54,12 +54,6 @@ export default async function handler(
           ? properties['Name'].title[0]?.plain_text || '未命名书籍'
           : '未命名书籍';
 
-      // 提取作者
-      let author = 'Unknown';
-      if (properties['作者']?.type === 'rich_text' && properties['作者'].rich_text.length > 0) {
-        author = properties['作者'].rich_text[0].plain_text;
-      }
-
       // 提取评分
       let rating = 3;
       if (properties['评分']?.type === 'select') {
@@ -70,11 +64,28 @@ export default async function handler(
         rating = (ratingStr.match(/⭐/g) || []).length || 3;
       }
 
-      // 提取阅读日期
-      const readDate =
-        properties['阅读日期']?.type === 'date'
-          ? properties['阅读日期'].date?.start || undefined
+      // 提取开始日期
+      const startDate =
+        properties['开始日期']?.type === 'date'
+          ? properties['开始日期'].date?.start || undefined
           : undefined;
+
+      // 提取完成日期
+      const completedDate =
+        properties['完成日期']?.type === 'date'
+          ? properties['完成日期'].date?.start || undefined
+          : undefined;
+
+      // 提取完成状态（Formula）
+      let status = '进行中';
+      if (properties['完成状态']?.type === 'formula') {
+        const formulaValue = properties['完成状态'].formula;
+        if (formulaValue?.type === 'boolean') {
+          status = formulaValue.boolean ? '已完成' : '进行中';
+        } else if (formulaValue?.type === 'string' && formulaValue.string) {
+          status = formulaValue.string;
+        }
+      }
 
       // 提取标签
       let tags: string[] = [];
@@ -122,9 +133,10 @@ export default async function handler(
       books.push({
         id: page.id,
         title,
-        author,
         rating,
-        readDate,
+        startDate,
+        completedDate,
+        status,
         tags,
         cover,
         favorite,
