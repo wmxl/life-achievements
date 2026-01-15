@@ -14,6 +14,11 @@ export default async function handler(
   }
 
   try {
+    if (!NOTION_TOKEN) {
+      console.error('NOTION_TOKEN is not set');
+      return res.status(500).json({ error: 'Server configuration error: Missing NOTION_TOKEN' });
+    }
+
     const response = await fetch(
       `https://api.notion.com/v1/databases/${BOOKS_DATABASE_ID}/query`,
       {
@@ -37,16 +42,17 @@ export default async function handler(
     if (!response.ok) {
       const error = await response.json();
       console.error('Notion API error:', error);
-      return res.status(response.status).json({ error: error.message });
+      return res.status(response.status).json({ error: error.message || 'Notion API error', details: error });
     }
 
     const data = await response.json();
     const books = [];
 
     for (const page of data.results) {
-      if (!('properties' in page)) continue;
+      try {
+        if (!('properties' in page)) continue;
 
-      const properties = page.properties;
+        const properties = page.properties;
 
       // 提取标题
       const title =
@@ -143,6 +149,11 @@ export default async function handler(
         content,
         slug,
       });
+      } catch (pageError: any) {
+        console.error('Error processing book page:', pageError);
+        // 跳过这个条目，继续处理下一个
+        continue;
+      }
     }
 
     // 设置缓存头（可选，减少 Notion API 调用）

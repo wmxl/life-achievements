@@ -157,13 +157,13 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
                 ${book.cover ? `<img src="${book.cover}" alt="${book.title}" class="card-cover" />` : ''}
                 <div class="card-content">
                   <h2>
-                    ${book.title}
+                    ${book.title || '未命名'}
                     ${book.favorite ? '<span class="favorite-badge">❤️ 最爱</span>' : ''}
                   </h2>
-                  <div class="card-rating">${'⭐'.repeat(book.rating)}</div>
-                  <div class="card-meta">${book.status}</div>
+                  <div class="card-rating">${'⭐'.repeat(book.rating || 0)}</div>
+                  ${book.status ? `<div class="card-meta">${book.status}</div>` : ''}
                   ${dateLines.length > 0 ? `<div class="card-meta">📅 ${dateLines.join(' · ')}</div>` : ''}
-                  ${book.tags.length > 0 ? `
+                  ${book.tags && book.tags.length > 0 ? `
                     <div class="card-tags">
                       ${book.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                     </div>
@@ -199,7 +199,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       console.error('Error loading books:', error);
       const errorDiv = document.getElementById('error');
       if (errorDiv) {
-        errorDiv.textContent = '加载失败，请刷新重试';
+        errorDiv.textContent = '加载失败，请刷新重试。错误: ' + (error.message || error);
         errorDiv.style.display = 'block';
       }
       document.getElementById('loading')?.remove();
