@@ -1,29 +1,13 @@
 // Vercel Serverless Function - 更新今日 Todo
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
 const NOTION_TOKEN = process.env.NOTION_TOKEN;
 const TODO_DATABASE_ID = '2e9223bbe551802596d9e26ecbd7e248';
 
-interface TodoData {
-  date: string;
-  weight?: number;
-  remark?: string;
-  momo: boolean;
-  pushup: boolean;
-  squat: boolean;
-  pullup: boolean;
-  standing: boolean;
-}
-
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const todo: TodoData = req.body;
+  const todo = req.body;
 
   // 验证日期格式
   if (!todo.date || !/^\d{4}-\d{2}-\d{2}$/.test(todo.date)) {
@@ -119,7 +103,7 @@ export default async function handler(
     }
 
     return res.status(200).json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error updating todo:', error);
     return res.status(500).json({ error: error.message || 'Internal server error' });
   }

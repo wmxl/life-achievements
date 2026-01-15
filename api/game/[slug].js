@@ -1,13 +1,8 @@
 // Vercel Serverless Function - 获取单个游戏详情
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
 const NOTION_TOKEN = process.env.NOTION_TOKEN;
 const GAMES_DATABASE_ID = process.env.NOTION_GAMES_DB_ID;
 
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
+export default async function handler(req, res) {
   const { slug } = req.query;
 
   if (req.method !== 'GET') {
@@ -93,12 +88,12 @@ export default async function handler(
         }
       }
 
-      let tags: string[] = [];
+      let tags = [];
       if (properties['标签']?.type === 'multi_select') {
-        tags = properties['标签'].multi_select.map((tag: any) => tag.name);
+        tags = properties['标签'].multi_select.map((tag) => tag.name);
       } else if (properties['标签']?.type === 'rich_text' && properties['标签'].rich_text.length > 0) {
         const tagsStr = properties['标签'].rich_text[0].plain_text;
-        tags = tagsStr.split(/[,，]/).map((t: string) => t.trim()).filter((t: string) => t);
+        tags = tagsStr.split(/[,，]/).map((t) => t.trim()).filter((t) => t);
       }
 
       const steamUrl =
@@ -106,7 +101,7 @@ export default async function handler(
           ? properties['链接'].url || undefined
           : undefined;
 
-      let cover: string | undefined;
+      let cover;
       if (properties['封面']?.type === 'files' && properties['封面'].files.length > 0) {
         const file = properties['封面'].files[0];
         if ('file' in file) {
@@ -127,7 +122,7 @@ export default async function handler(
       let content = '';
       if (properties['评价']?.type === 'rich_text') {
         content = properties['评价'].rich_text
-          .map((text: any) => text.plain_text)
+          .map((text) => text.plain_text)
           .join('');
       }
 
@@ -152,7 +147,7 @@ export default async function handler(
     }
 
     return res.status(404).json({ error: 'Game not found' });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching game:', error);
     return res.status(500).json({ error: error.message || 'Internal server error' });
   }

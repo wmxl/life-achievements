@@ -1,18 +1,13 @@
 // Vercel Serverless Function - 获取 Todo 历史记录
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
 const NOTION_TOKEN = process.env.NOTION_TOKEN;
 const TODO_DATABASE_ID = '2e9223bbe551802596d9e26ecbd7e248';
 
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
+export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const limit = parseInt(req.query.limit as string) || 30;
+  const limit = parseInt(req.query.limit, 10) || 30;
 
   try {
     const response = await fetch(
@@ -53,7 +48,7 @@ export default async function handler(
       const todo = {
         date: properties['日期']?.title?.[0]?.plain_text || '',
         weight: properties['体重']?.number || undefined,
-        remark: properties['备注']?.rich_text?.map((t: any) => t.plain_text).join('') || undefined,
+        remark: properties['备注']?.rich_text?.map((t) => t.plain_text).join('') || undefined,
         momo: properties['墨墨背单词']?.checkbox || false,
         pushup: properties['俯卧撑一组']?.checkbox || false,
         squat: properties['深蹲一组']?.checkbox || false,
@@ -68,7 +63,7 @@ export default async function handler(
 
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
     return res.status(200).json(history);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching todo history:', error);
     return res.status(500).json({ error: error.message || 'Internal server error' });
   }

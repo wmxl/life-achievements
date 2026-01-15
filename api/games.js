@@ -1,13 +1,8 @@
-// Vercel Serverless Function - 获取书籍列表
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
+// Vercel Serverless Function - 获取游戏列表
 const NOTION_TOKEN = process.env.NOTION_TOKEN;
-const BOOKS_DATABASE_ID = '2e9223bbe551800ea578fd67ad1c16c8';
+const GAMES_DATABASE_ID = process.env.NOTION_GAMES_DB_ID;
 
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
+export default async function handler(req, res) {
   // 只允许 GET 请求
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -15,7 +10,7 @@ export default async function handler(
 
   try {
     const response = await fetch(
-      `https://api.notion.com/v1/databases/${BOOKS_DATABASE_ID}/query`,
+      `https://api.notion.com/v1/databases/${GAMES_DATABASE_ID}/query`,
       {
         method: 'POST',
         headers: {
@@ -41,7 +36,7 @@ export default async function handler(
     }
 
     const data = await response.json();
-    const books = [];
+    const games = [];
 
     for (const page of data.results) {
       if (!('properties' in page)) continue;
@@ -51,8 +46,16 @@ export default async function handler(
       // 提取标题
       const title =
         properties['Name']?.type === 'title'
-          ? properties['Name'].title[0]?.plain_text || '未命名书籍'
-          : '未命名书籍';
+          ? properties['Name'].title[0]?.plain_text || '未命名游戏'
+          : '未命名游戏';
+
+      // 提取平台
+      let platform = 'Unknown';
+      if (properties['平台']?.type === 'select') {
+        platform = properties['平台'].select?.name || 'Unknown';
+      } else if (properties['平台']?.type === 'rich_text' && properties['平台'].rich_text.length > 0) {
+        platform = properties['平台'].rich_text[0].plain_text;
+      }
 
       // 提取评分
       let rating = 3;
@@ -88,22 +91,22 @@ export default async function handler(
       }
 
       // 提取标签
-      let tags: string[] = [];
+      let tags = [];
       if (properties['标签']?.type === 'multi_select') {
-        tags = properties['标签'].multi_select.map((tag: any) => tag.name);
+        tags = properties['标签'].multi_select.map((tag) => tag.name);
       } else if (properties['标签']?.type === 'rich_text' && properties['标签'].rich_text.length > 0) {
         const tagsStr = properties['标签'].rich_text[0].plain_text;
-        tags = tagsStr.split(/[,，]/).map((t: string) => t.trim()).filter((t: string) => t);
+        tags = tagsStr.split(/[,，]/).map((t) => t.trim()).filter((t) => t);
       }
 
       // 提取链接
-      const bookUrl =
+      const steamUrl =
         properties['链接']?.type === 'url'
           ? properties['链接'].url || undefined
           : undefined;
 
       // 提取封面
-      let cover: string | undefined;
+      let cover;
       if (properties['封面']?.type === 'files' && properties['封面'].files.length > 0) {
         const file = properties['封面'].files[0];
         if ('file' in file) {
@@ -126,7 +129,7 @@ export default async function handler(
       let content = '';
       if (properties['评价']?.type === 'rich_text') {
         content = properties['评价'].rich_text
-          .map((text: any) => text.plain_text)
+          .map((text) => text.plain_text)
           .join('');
       }
 
@@ -136,15 +139,16 @@ export default async function handler(
         .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
         .replace(/^-|-$/g, '');
 
-      books.push({
+      games.push({
         id: page.id,
         title,
+        platform,
         rating,
         startDate,
         completedDate,
         status,
         tags,
-        bookUrl,
+        steamUrl,
         cover,
         favorite,
         content,
@@ -154,10 +158,9 @@ export default async function handler(
 
     // 设置缓存头（可选，减少 Notion API 调用）
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
-
-    return res.status(200).json({ books });
-  } catch (error: any) {
-    console.error('Error fetching books:', error);
+    return res.status(200).json({ games });
+  } catch (error) {
+    console.error('Error fetching games:', error);
     return res.status(500).json({ error: error.message || 'Internal server error' });
   }
 }
