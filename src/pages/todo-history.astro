@@ -45,10 +45,7 @@ import Layout from '../layouts/Layout.astro';
           <div class="history-item">
             <div class="history-header">
               <h3>${formatDateDisplay(todo.date)}</h3>
-              ${todo.weight ? `<span class="weight-badge">⚖️ ${todo.weight} kg</span>` : ''}
             </div>
-
-            ${todo.remark ? `<p class="remark">${todo.remark}</p>` : ''}
 
             <div class="checklist">
               <div class="check-item ${todo.momo ? 'checked' : ''}">
@@ -73,6 +70,8 @@ import Layout from '../layouts/Layout.astro';
               </div>
             </div>
 
+            ${todo.weight ? `<span class="weight-badge">⚖️ ${todo.weight} kg</span>` : ''}
+            ${todo.remark ? `<p class="remark">${todo.remark}</p>` : ''}
           </div>
         `).join('');
       } else {
@@ -167,6 +166,8 @@ import Layout from '../layouts/Layout.astro';
     padding: 0.25rem 0.75rem;
     border-radius: 1rem;
     font-size: 0.9rem;
+    display: inline-block;
+    margin-top: 0.75rem;
   }
 
   .remark {

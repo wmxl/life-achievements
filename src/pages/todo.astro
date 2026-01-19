@@ -208,10 +208,7 @@ import Layout from '../layouts/Layout.astro';
             <div class="history-item">
               <div class="history-header">
                 <h3>${formatDateDisplay(item.date)}</h3>
-                ${item.weight ? `<span class="weight-badge">⚖️ ${item.weight} kg</span>` : ''}
               </div>
-
-              ${item.remark ? `<p class="remark">${item.remark}</p>` : ''}
 
               <div class="checklist">
                 <div class="check-item ${item.momo ? 'checked' : ''}">
@@ -235,6 +232,9 @@ import Layout from '../layouts/Layout.astro';
                   <span>站桩</span>
                 </div>
               </div>
+
+              ${item.weight ? `<span class="weight-badge">⚖️ ${item.weight} kg</span>` : ''}
+              ${item.remark ? `<p class="remark">${item.remark}</p>` : ''}
             </div>
           `)
           .join('');
@@ -445,6 +445,8 @@ import Layout from '../layouts/Layout.astro';
     padding: 0.25rem 0.75rem;
     border-radius: 1rem;
     font-size: 0.9rem;
+    display: inline-block;
+    margin-top: 0.75rem;
   }
 
   .remark {

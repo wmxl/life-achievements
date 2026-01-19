@@ -45,6 +45,21 @@ npm run dev
 
 访问 `http://localhost:4321/games` 查看游戏列表。
 
+如果需要在本地调用 `/api/*`（Vercel Serverless Functions）并访问 Notion，请先安装 Vercel CLI，再使用：
+
+```bash
+npm i -g vercel
+```
+
+```bash
+vercel dev
+```
+
+为什么要装 Vercel CLI：
+1. `astro dev` 不会启动 `api/` 下的 Vercel Serverless Functions，导致本地无法访问 Notion。
+2. `vercel dev` 会在本地模拟 Vercel 运行环境，能够正常代理 `/api/*`，与线上行为一致。
+3. 统一本地与线上调试路径，减少部署后才发现的问题。
+
 ### 构建生产版本
 
 ```bash
