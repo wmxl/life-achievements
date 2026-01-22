@@ -94,7 +94,7 @@ import Layout from '../layouts/Layout.astro';
     const errorMessage = document.getElementById('errorMessage');
     const dateDisplay = document.getElementById('dateDisplay');
 
-    const today = getTodayDate();
+    const today = activeDate;
 
     if (dateDisplay) {
       dateDisplay.textContent = formatDateDisplay(today);
@@ -133,10 +133,37 @@ import Layout from '../layouts/Layout.astro';
   let lastSavedPayload = '';
   let isSaving = false;
   let dataReady = false;
+  let activeDate = getTodayDate();
+
+  function resetForm() {
+    (document.getElementById('weight') as HTMLInputElement).value = '';
+    (document.getElementById('remark') as HTMLTextAreaElement).value = '';
+    (document.getElementById('momo') as HTMLInputElement).checked = false;
+    (document.getElementById('pushup') as HTMLInputElement).checked = false;
+    (document.getElementById('squat') as HTMLInputElement).checked = false;
+    (document.getElementById('pullup') as HTMLInputElement).checked = false;
+    (document.getElementById('standing') as HTMLInputElement).checked = false;
+  }
+
+  function syncDateIfNeeded() {
+    const currentDate = getTodayDate();
+    if (currentDate === activeDate) return;
+
+    activeDate = currentDate;
+    dataReady = false;
+    lastSavedPayload = '';
+
+    const loading = document.getElementById('loading');
+    const form = document.getElementById('todoForm') as HTMLFormElement;
+    if (loading) loading.style.display = 'block';
+    if (form) form.style.display = 'none';
+    resetForm();
+    void loadTodayTodo();
+  }
 
   function buildTodoData() {
     return {
-      date: getTodayDate(),
+      date: activeDate,
       weight: parseFloat((document.getElementById('weight') as HTMLInputElement).value) || undefined,
       remark: (document.getElementById('remark') as HTMLTextAreaElement).value || undefined,
       momo: (document.getElementById('momo') as HTMLInputElement).checked,
@@ -152,6 +179,8 @@ import Layout from '../layouts/Layout.astro';
     const successMessage = document.getElementById('successMessage');
     const errorMessage = document.getElementById('errorMessage');
 
+    if (!dataReady || isSaving) return;
+    syncDateIfNeeded();
     if (!dataReady || isSaving) return;
     const todoData = buildTodoData();
     const payload = JSON.stringify(todoData);
@@ -256,6 +285,7 @@ import Layout from '../layouts/Layout.astro';
     loadTodayTodo();
     loadRecentHistory();
     setInterval(saveTodo, 2000);
+    setInterval(syncDateIfNeeded, 60 * 1000);
   });
 </script>
 
