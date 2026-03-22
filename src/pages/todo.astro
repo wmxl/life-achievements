@@ -33,6 +33,7 @@ import Layout from '../layouts/Layout.astro';
             <div class="number-group">
               <div class="number-group-row">
                 <label for="pushup">俯卧撑</label>
+                <input type="text" id="pushupNote" class="exercise-note" placeholder="备注" />
                 <div class="number-input-row">
                   <button type="button" class="count-btn" data-target="pushup" data-delta="-1">−</button>
                   <input type="number" id="pushup" min="0" value="0" />
@@ -40,11 +41,11 @@ import Layout from '../layouts/Layout.astro';
                   <span class="unit">组</span>
                 </div>
               </div>
-              <input type="text" id="pushupNote" class="exercise-note" placeholder="备注（如：每组 15 个）" />
             </div>
             <div class="number-group">
               <div class="number-group-row">
                 <label for="squat">深蹲</label>
+                <input type="text" id="squatNote" class="exercise-note" placeholder="备注" />
                 <div class="number-input-row">
                   <button type="button" class="count-btn" data-target="squat" data-delta="-1">−</button>
                   <input type="number" id="squat" min="0" value="0" />
@@ -52,11 +53,11 @@ import Layout from '../layouts/Layout.astro';
                   <span class="unit">组</span>
                 </div>
               </div>
-              <input type="text" id="squatNote" class="exercise-note" placeholder="备注（如：每组 20 个）" />
             </div>
             <div class="number-group">
               <div class="number-group-row">
                 <label for="pullup">抓杠</label>
+                <input type="text" id="pullupNote" class="exercise-note" placeholder="备注" />
                 <div class="number-input-row">
                   <button type="button" class="count-btn" data-target="pullup" data-delta="-1">−</button>
                   <input type="number" id="pullup" min="0" value="0" />
@@ -64,11 +65,11 @@ import Layout from '../layouts/Layout.astro';
                   <span class="unit">次</span>
                 </div>
               </div>
-              <input type="text" id="pullupNote" class="exercise-note" placeholder="备注（如：抓 20s 一次）" />
             </div>
             <div class="number-group">
               <div class="number-group-row">
                 <label for="standing">站桩</label>
+                <input type="text" id="standingNote" class="exercise-note" placeholder="备注" />
                 <div class="number-input-row">
                   <button type="button" class="count-btn" data-target="standing" data-delta="-1">−</button>
                   <input type="number" id="standing" min="0" value="0" />
@@ -76,7 +77,6 @@ import Layout from '../layouts/Layout.astro';
                   <span class="unit">组</span>
                 </div>
               </div>
-              <input type="text" id="standingNote" class="exercise-note" placeholder="备注（如：每组 5 分钟）" />
             </div>
           </div>
         </div>
@@ -498,10 +498,9 @@ import Layout from '../layouts/Layout.astro';
   }
 
   .exercise-note {
-    display: block;
-    width: 100%;
-    margin-top: 0.3rem;
-    padding: 0.2rem 0.4rem;
+    flex: 1;
+    min-width: 0;
+    padding: 0.15rem 0.4rem;
     font-size: 0.8rem;
     color: var(--color-text-secondary);
     border: none;
@@ -510,7 +509,6 @@ import Layout from '../layouts/Layout.astro';
     background: transparent;
     outline: none;
     font-family: inherit;
-    box-sizing: border-box;
   }
 
   .exercise-note:focus {
