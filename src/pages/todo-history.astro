@@ -52,21 +52,25 @@ import Layout from '../layouts/Layout.astro';
                 <span class="icon">${todo.momo ? '✅' : '⬜'}</span>
                 <span>墨墨背单词</span>
               </div>
-              <div class="check-item ${todo.pushup ? 'checked' : ''}">
-                <span class="icon">${todo.pushup ? '✅' : '⬜'}</span>
-                <span>俯卧撑一组</span>
+              <div class="check-item ${todo.pushup > 0 ? 'checked' : ''}">
+                <span class="icon">${todo.pushup > 0 ? '✅' : '⬜'}</span>
+                <span>俯卧撑 ${todo.pushup > 0 ? `×${todo.pushup}` : ''}</span>
+                ${todo.pushupNote ? `<span class="exercise-note-tag">${todo.pushupNote}</span>` : ''}
               </div>
-              <div class="check-item ${todo.squat ? 'checked' : ''}">
-                <span class="icon">${todo.squat ? '✅' : '⬜'}</span>
-                <span>深蹲一组</span>
+              <div class="check-item ${todo.squat > 0 ? 'checked' : ''}">
+                <span class="icon">${todo.squat > 0 ? '✅' : '⬜'}</span>
+                <span>深蹲 ${todo.squat > 0 ? `×${todo.squat}` : ''}</span>
+                ${todo.squatNote ? `<span class="exercise-note-tag">${todo.squatNote}</span>` : ''}
               </div>
-              <div class="check-item ${todo.pullup ? 'checked' : ''}">
-                <span class="icon">${todo.pullup ? '✅' : '⬜'}</span>
-                <span>抓杠 3 次</span>
+              <div class="check-item ${todo.pullup > 0 ? 'checked' : ''}">
+                <span class="icon">${todo.pullup > 0 ? '✅' : '⬜'}</span>
+                <span>抓杠 ${todo.pullup > 0 ? `×${todo.pullup}` : ''}</span>
+                ${todo.pullupNote ? `<span class="exercise-note-tag">${todo.pullupNote}</span>` : ''}
               </div>
-              <div class="check-item ${todo.standing ? 'checked' : ''}">
-                <span class="icon">${todo.standing ? '✅' : '⬜'}</span>
-                <span>站桩</span>
+              <div class="check-item ${todo.standing > 0 ? 'checked' : ''}">
+                <span class="icon">${todo.standing > 0 ? '✅' : '⬜'}</span>
+                <span>站桩 ${todo.standing > 0 ? `×${todo.standing}` : ''}</span>
+                ${todo.standingNote ? `<span class="exercise-note-tag">${todo.standingNote}</span>` : ''}
               </div>
             </div>
 
@@ -197,6 +201,13 @@ import Layout from '../layouts/Layout.astro';
 
   .check-item.checked {
     color: #059669;
+  }
+
+  .exercise-note-tag {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: #9ca3af;
+    white-space: nowrap;
   }
 
   .check-item .icon {

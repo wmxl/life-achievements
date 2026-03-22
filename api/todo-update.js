@@ -49,10 +49,22 @@ export default async function handler(req, res) {
         rich_text: todo.remark ? [{ text: { content: todo.remark } }] : [],
       },
       '墨墨背单词': { checkbox: todo.momo },
-      '俯卧撑一组': { checkbox: todo.pushup },
-      '深蹲一组': { checkbox: todo.squat },
-      '抓杠3次': { checkbox: todo.pullup },
-      '站桩': { checkbox: todo.standing },
+      '俯卧撑一组': { number: todo.pushup ?? 0 },
+      '深蹲一组': { number: todo.squat ?? 0 },
+      '抓杠3次': { number: todo.pullup ?? 0 },
+      '站桩': { number: todo.standing ?? 0 },
+      '俯卧撑备注': {
+        rich_text: todo.pushupNote ? [{ text: { content: todo.pushupNote } }] : [],
+      },
+      '深蹲备注': {
+        rich_text: todo.squatNote ? [{ text: { content: todo.squatNote } }] : [],
+      },
+      '抓杠备注': {
+        rich_text: todo.pullupNote ? [{ text: { content: todo.pullupNote } }] : [],
+      },
+      '站桩备注': {
+        rich_text: todo.standingNote ? [{ text: { content: todo.standingNote } }] : [],
+      },
     };
 
     let response;

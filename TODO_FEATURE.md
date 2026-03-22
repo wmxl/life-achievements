@@ -36,10 +36,10 @@
 | 体重 | Number | 体重（kg） |
 | 备注 | Rich Text | 今日备注 |
 | 墨墨背单词 | Checkbox | 是否完成 |
-| 俯卧撑一组 | Checkbox | 是否完成 |
-| 深蹲一组 | Checkbox | 是否完成 |
-| 抓杠3次 | Checkbox | 是否完成 |
-| 站桩 | Checkbox | 是否完成 |
+| 俯卧撑一组 | Number | 完成组数（0 = 未完成） |
+| 深蹲一组 | Number | 完成组数（0 = 未完成） |
+| 抓杠3次 | Number | 完成次数（0 = 未完成） |
+| 站桩 | Number | 完成组数（0 = 未完成） |
 
 ## 使用方法
 

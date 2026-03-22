@@ -30,29 +30,53 @@ import Layout from '../layouts/Layout.astro';
                 <span>墨墨背单词</span>
               </label>
             </div>
-            <div class="checkbox-group">
-              <label>
-                <input type="checkbox" id="pushup" />
-                <span>俯卧撑一组</span>
-              </label>
+            <div class="number-group">
+              <div class="number-group-row">
+                <label for="pushup">俯卧撑</label>
+                <div class="number-input-row">
+                  <button type="button" class="count-btn" data-target="pushup" data-delta="-1">−</button>
+                  <input type="number" id="pushup" min="0" value="0" />
+                  <button type="button" class="count-btn" data-target="pushup" data-delta="1">+</button>
+                  <span class="unit">组</span>
+                </div>
+              </div>
+              <input type="text" id="pushupNote" class="exercise-note" placeholder="备注（如：每组 15 个）" />
             </div>
-            <div class="checkbox-group">
-              <label>
-                <input type="checkbox" id="squat" />
-                <span>深蹲一组</span>
-              </label>
+            <div class="number-group">
+              <div class="number-group-row">
+                <label for="squat">深蹲</label>
+                <div class="number-input-row">
+                  <button type="button" class="count-btn" data-target="squat" data-delta="-1">−</button>
+                  <input type="number" id="squat" min="0" value="0" />
+                  <button type="button" class="count-btn" data-target="squat" data-delta="1">+</button>
+                  <span class="unit">组</span>
+                </div>
+              </div>
+              <input type="text" id="squatNote" class="exercise-note" placeholder="备注（如：每组 20 个）" />
             </div>
-            <div class="checkbox-group">
-              <label>
-                <input type="checkbox" id="pullup" />
-                <span>抓杠 3 次</span>
-              </label>
+            <div class="number-group">
+              <div class="number-group-row">
+                <label for="pullup">抓杠</label>
+                <div class="number-input-row">
+                  <button type="button" class="count-btn" data-target="pullup" data-delta="-1">−</button>
+                  <input type="number" id="pullup" min="0" value="0" />
+                  <button type="button" class="count-btn" data-target="pullup" data-delta="1">+</button>
+                  <span class="unit">次</span>
+                </div>
+              </div>
+              <input type="text" id="pullupNote" class="exercise-note" placeholder="备注（如：抓 20s 一次）" />
             </div>
-            <div class="checkbox-group">
-              <label>
-                <input type="checkbox" id="standing" />
-                <span>站桩</span>
-              </label>
+            <div class="number-group">
+              <div class="number-group-row">
+                <label for="standing">站桩</label>
+                <div class="number-input-row">
+                  <button type="button" class="count-btn" data-target="standing" data-delta="-1">−</button>
+                  <input type="number" id="standing" min="0" value="0" />
+                  <button type="button" class="count-btn" data-target="standing" data-delta="1">+</button>
+                  <span class="unit">组</span>
+                </div>
+              </div>
+              <input type="text" id="standingNote" class="exercise-note" placeholder="备注（如：每组 5 分钟）" />
             </div>
           </div>
         </div>
@@ -111,14 +135,17 @@ import Layout from '../layouts/Layout.astro';
       if (form) form.style.display = 'block';
 
       if (data) {
-        // 填充表单数据
         (document.getElementById('weight') as HTMLInputElement).value = data.weight || '';
         (document.getElementById('remark') as HTMLTextAreaElement).value = data.remark || '';
         (document.getElementById('momo') as HTMLInputElement).checked = data.momo || false;
-        (document.getElementById('pushup') as HTMLInputElement).checked = data.pushup || false;
-        (document.getElementById('squat') as HTMLInputElement).checked = data.squat || false;
-        (document.getElementById('pullup') as HTMLInputElement).checked = data.pullup || false;
-        (document.getElementById('standing') as HTMLInputElement).checked = data.standing || false;
+        (document.getElementById('pushup') as HTMLInputElement).value = String(data.pushup ?? 0);
+        (document.getElementById('squat') as HTMLInputElement).value = String(data.squat ?? 0);
+        (document.getElementById('pullup') as HTMLInputElement).value = String(data.pullup ?? 0);
+        (document.getElementById('standing') as HTMLInputElement).value = String(data.standing ?? 0);
+        (document.getElementById('pushupNote') as HTMLInputElement).value = data.pushupNote || '';
+        (document.getElementById('squatNote') as HTMLInputElement).value = data.squatNote || '';
+        (document.getElementById('pullupNote') as HTMLInputElement).value = data.pullupNote || '';
+        (document.getElementById('standingNote') as HTMLInputElement).value = data.standingNote || '';
       }
 
       dataReady = true;
@@ -142,10 +169,14 @@ import Layout from '../layouts/Layout.astro';
     (document.getElementById('weight') as HTMLInputElement).value = '';
     (document.getElementById('remark') as HTMLTextAreaElement).value = '';
     (document.getElementById('momo') as HTMLInputElement).checked = false;
-    (document.getElementById('pushup') as HTMLInputElement).checked = false;
-    (document.getElementById('squat') as HTMLInputElement).checked = false;
-    (document.getElementById('pullup') as HTMLInputElement).checked = false;
-    (document.getElementById('standing') as HTMLInputElement).checked = false;
+    (document.getElementById('pushup') as HTMLInputElement).value = '0';
+    (document.getElementById('squat') as HTMLInputElement).value = '0';
+    (document.getElementById('pullup') as HTMLInputElement).value = '0';
+    (document.getElementById('standing') as HTMLInputElement).value = '0';
+    (document.getElementById('pushupNote') as HTMLInputElement).value = '';
+    (document.getElementById('squatNote') as HTMLInputElement).value = '';
+    (document.getElementById('pullupNote') as HTMLInputElement).value = '';
+    (document.getElementById('standingNote') as HTMLInputElement).value = '';
   }
 
   function syncDateIfNeeded() {
@@ -170,10 +201,14 @@ import Layout from '../layouts/Layout.astro';
       weight: parseFloat((document.getElementById('weight') as HTMLInputElement).value) || undefined,
       remark: (document.getElementById('remark') as HTMLTextAreaElement).value || undefined,
       momo: (document.getElementById('momo') as HTMLInputElement).checked,
-      pushup: (document.getElementById('pushup') as HTMLInputElement).checked,
-      squat: (document.getElementById('squat') as HTMLInputElement).checked,
-      pullup: (document.getElementById('pullup') as HTMLInputElement).checked,
-      standing: (document.getElementById('standing') as HTMLInputElement).checked,
+      pushup: parseInt((document.getElementById('pushup') as HTMLInputElement).value) || 0,
+      squat: parseInt((document.getElementById('squat') as HTMLInputElement).value) || 0,
+      pullup: parseInt((document.getElementById('pullup') as HTMLInputElement).value) || 0,
+      standing: parseInt((document.getElementById('standing') as HTMLInputElement).value) || 0,
+      pushupNote: (document.getElementById('pushupNote') as HTMLInputElement).value || '',
+      squatNote: (document.getElementById('squatNote') as HTMLInputElement).value || '',
+      pullupNote: (document.getElementById('pullupNote') as HTMLInputElement).value || '',
+      standingNote: (document.getElementById('standingNote') as HTMLInputElement).value || '',
     };
   }
 
@@ -247,21 +282,25 @@ import Layout from '../layouts/Layout.astro';
                   <span class="icon">${item.momo ? '✅' : '⬜'}</span>
                   <span>墨墨背单词</span>
                 </div>
-                <div class="check-item ${item.pushup ? 'checked' : ''}">
-                  <span class="icon">${item.pushup ? '✅' : '⬜'}</span>
-                  <span>俯卧撑一组</span>
+                <div class="check-item ${item.pushup > 0 ? 'checked' : ''}">
+                  <span class="icon">${item.pushup > 0 ? '✅' : '⬜'}</span>
+                  <span>俯卧撑 ${item.pushup > 0 ? `×${item.pushup}` : ''}</span>
+                  ${item.pushupNote ? `<span class="exercise-note-tag">${item.pushupNote}</span>` : ''}
                 </div>
-                <div class="check-item ${item.squat ? 'checked' : ''}">
-                  <span class="icon">${item.squat ? '✅' : '⬜'}</span>
-                  <span>深蹲一组</span>
+                <div class="check-item ${item.squat > 0 ? 'checked' : ''}">
+                  <span class="icon">${item.squat > 0 ? '✅' : '⬜'}</span>
+                  <span>深蹲 ${item.squat > 0 ? `×${item.squat}` : ''}</span>
+                  ${item.squatNote ? `<span class="exercise-note-tag">${item.squatNote}</span>` : ''}
                 </div>
-                <div class="check-item ${item.pullup ? 'checked' : ''}">
-                  <span class="icon">${item.pullup ? '✅' : '⬜'}</span>
-                  <span>抓杠 3 次</span>
+                <div class="check-item ${item.pullup > 0 ? 'checked' : ''}">
+                  <span class="icon">${item.pullup > 0 ? '✅' : '⬜'}</span>
+                  <span>抓杠 ${item.pullup > 0 ? `×${item.pullup}` : ''}</span>
+                  ${item.pullupNote ? `<span class="exercise-note-tag">${item.pullupNote}</span>` : ''}
                 </div>
-                <div class="check-item ${item.standing ? 'checked' : ''}">
-                  <span class="icon">${item.standing ? '✅' : '⬜'}</span>
-                  <span>站桩</span>
+                <div class="check-item ${item.standing > 0 ? 'checked' : ''}">
+                  <span class="icon">${item.standing > 0 ? '✅' : '⬜'}</span>
+                  <span>站桩 ${item.standing > 0 ? `×${item.standing}` : ''}</span>
+                  ${item.standingNote ? `<span class="exercise-note-tag">${item.standingNote}</span>` : ''}
                 </div>
               </div>
 
@@ -289,6 +328,16 @@ import Layout from '../layouts/Layout.astro';
     loadRecentHistory();
     setInterval(saveTodo, 2000);
     setInterval(syncDateIfNeeded, 60 * 1000);
+
+    document.querySelectorAll('.count-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const target = (btn as HTMLElement).dataset.target!;
+        const delta = parseInt((btn as HTMLElement).dataset.delta!);
+        const input = document.getElementById(target) as HTMLInputElement;
+        const newVal = Math.max(0, (parseInt(input.value) || 0) + delta);
+        input.value = String(newVal);
+      });
+    });
   });
 </script>
 
@@ -382,6 +431,95 @@ import Layout from '../layouts/Layout.astro';
 
   .checkbox-group span {
     font-size: 0.95rem;
+  }
+
+  .number-group {
+    margin-bottom: 0.75rem;
+  }
+
+  .number-group-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem;
+    background: white;
+    border-radius: var(--radius);
+  }
+
+  .number-group-row label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: 0;
+    cursor: default;
+  }
+
+  .number-input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .number-input-row input[type="number"] {
+    width: 2.2rem;
+    text-align: center;
+    padding: 0.15rem 0.1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+  }
+
+  .count-btn {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-bg-secondary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .count-btn:hover {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+  }
+
+  .unit {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+  }
+
+  .exercise-note {
+    display: block;
+    width: 100%;
+    margin-top: 0.3rem;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    border: none;
+    border-bottom: 1px dashed var(--color-border);
+    border-radius: 0;
+    background: transparent;
+    outline: none;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  .exercise-note:focus {
+    border-bottom-color: var(--color-primary);
+    color: var(--color-text);
+  }
+
+  .exercise-note::placeholder {
+    color: #ccc;
   }
 
   .btn-primary,
@@ -508,6 +646,13 @@ import Layout from '../layouts/Layout.astro';
 
   .check-item.checked {
     color: #059669;
+  }
+
+  .exercise-note-tag {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: #9ca3af;
+    white-space: nowrap;
   }
 
   .check-item .icon {

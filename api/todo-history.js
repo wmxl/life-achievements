@@ -50,10 +50,14 @@ export default async function handler(req, res) {
         weight: properties['体重']?.number || undefined,
         remark: properties['备注']?.rich_text?.map((t) => t.plain_text).join('') || undefined,
         momo: properties['墨墨背单词']?.checkbox || false,
-        pushup: properties['俯卧撑一组']?.checkbox || false,
-        squat: properties['深蹲一组']?.checkbox || false,
-        pullup: properties['抓杠3次']?.checkbox || false,
-        standing: properties['站桩']?.checkbox || false,
+        pushup: properties['俯卧撑一组']?.number ?? 0,
+        squat: properties['深蹲一组']?.number ?? 0,
+        pullup: properties['抓杠3次']?.number ?? 0,
+        standing: properties['站桩']?.number ?? 0,
+        pushupNote: properties['俯卧撑备注']?.rich_text?.map((t) => t.plain_text).join('') || '',
+        squatNote: properties['深蹲备注']?.rich_text?.map((t) => t.plain_text).join('') || '',
+        pullupNote: properties['抓杠备注']?.rich_text?.map((t) => t.plain_text).join('') || '',
+        standingNote: properties['站桩备注']?.rich_text?.map((t) => t.plain_text).join('') || '',
       };
 
       if (todo.date) {
