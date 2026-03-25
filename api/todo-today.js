@@ -18,10 +18,12 @@ function parseProperties(properties, date) {
     squat: properties['深蹲一组']?.number ?? 0,
     pullup: properties['抓杠3次']?.number ?? 0,
     standing: properties['站桩']?.number ?? 0,
+    ec: properties['EC']?.number ?? 0,
     pushupNote: properties['俯卧撑备注']?.rich_text?.map((t) => t.plain_text).join('') || '',
     squatNote: properties['深蹲备注']?.rich_text?.map((t) => t.plain_text).join('') || '',
     pullupNote: properties['抓杠备注']?.rich_text?.map((t) => t.plain_text).join('') || '',
     standingNote: properties['站桩备注']?.rich_text?.map((t) => t.plain_text).join('') || '',
+    ecNote: properties['EC备注']?.rich_text?.map((t) => t.plain_text).join('') || '',
   };
 }
 
@@ -56,7 +58,7 @@ export default async function handler(req, res) {
     const todo = todayExists ? parseProperties(todayData.results[0].properties, date) : null;
 
     // 今天有记录且备注非全空，直接返回
-    const notesEmpty = !todo || (!todo.pushupNote && !todo.squatNote && !todo.pullupNote && !todo.standingNote);
+    const notesEmpty = !todo || (!todo.pushupNote && !todo.squatNote && !todo.pullupNote && !todo.standingNote && !todo.ecNote);
     if (todo && !notesEmpty) {
       res.setHeader('Cache-Control', 'no-cache');
       return res.status(200).json(todo);
@@ -95,11 +97,12 @@ export default async function handler(req, res) {
 
     res.setHeader('Cache-Control', 'no-cache');
     return res.status(200).json({
-      ...(todo || { date, weight: undefined, remark: undefined, momo: false, pushup: 0, squat: 0, pullup: 0, standing: 0 }),
+      ...(todo || { date, weight: undefined, remark: undefined, momo: false, pushup: 0, squat: 0, pullup: 0, standing: 0, ec: 0 }),
       pushupNote: latest.pushupNote,
       squatNote: latest.squatNote,
       pullupNote: latest.pullupNote,
       standingNote: latest.standingNote,
+      ecNote: latest.ecNote,
       isNew: !todayExists,
     });
   } catch (error) {

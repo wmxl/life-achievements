@@ -72,6 +72,11 @@ import Layout from '../layouts/Layout.astro';
                 <span>站桩 ${todo.standing > 0 ? `×${todo.standing}` : ''}</span>
                 ${todo.standingNote ? `<span class="exercise-note-tag">${todo.standingNote}</span>` : ''}
               </div>
+              <div class="check-item ${todo.ec > 0 ? 'checked' : ''}">
+                <span class="icon">${todo.ec > 0 ? '✅' : '⬜'}</span>
+                <span>EC ${todo.ec > 0 ? `×${todo.ec}` : ''}</span>
+                ${todo.ecNote ? `<span class="exercise-note-tag">${todo.ecNote}</span>` : ''}
+              </div>
             </div>
 
             ${todo.weight ? `<span class="weight-badge">⚖️ ${todo.weight} kg</span>` : ''}

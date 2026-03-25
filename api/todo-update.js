@@ -53,6 +53,7 @@ export default async function handler(req, res) {
       '深蹲一组': { number: todo.squat ?? 0 },
       '抓杠3次': { number: todo.pullup ?? 0 },
       '站桩': { number: todo.standing ?? 0 },
+      'EC': { number: todo.ec ?? 0 },
       '俯卧撑备注': {
         rich_text: todo.pushupNote ? [{ text: { content: todo.pushupNote } }] : [],
       },
@@ -64,6 +65,9 @@ export default async function handler(req, res) {
       },
       '站桩备注': {
         rich_text: todo.standingNote ? [{ text: { content: todo.standingNote } }] : [],
+      },
+      'EC备注': {
+        rich_text: todo.ecNote ? [{ text: { content: todo.ecNote } }] : [],
       },
     };
 

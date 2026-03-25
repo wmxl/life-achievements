@@ -78,6 +78,18 @@ import Layout from '../layouts/Layout.astro';
                 </div>
               </div>
             </div>
+            <div class="number-group">
+              <div class="number-group-row">
+                <label for="ec">EC</label>
+                <input type="text" id="ecNote" class="exercise-note" placeholder="备注" />
+                <div class="number-input-row">
+                  <button type="button" class="count-btn" data-target="ec" data-delta="-1">−</button>
+                  <input type="number" id="ec" min="0" value="0" />
+                  <button type="button" class="count-btn" data-target="ec" data-delta="1">+</button>
+                  <span class="unit">组</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -142,10 +154,12 @@ import Layout from '../layouts/Layout.astro';
         (document.getElementById('squat') as HTMLInputElement).value = String(data.squat ?? 0);
         (document.getElementById('pullup') as HTMLInputElement).value = String(data.pullup ?? 0);
         (document.getElementById('standing') as HTMLInputElement).value = String(data.standing ?? 0);
+        (document.getElementById('ec') as HTMLInputElement).value = String(data.ec ?? 0);
         (document.getElementById('pushupNote') as HTMLInputElement).value = data.pushupNote || '';
         (document.getElementById('squatNote') as HTMLInputElement).value = data.squatNote || '';
         (document.getElementById('pullupNote') as HTMLInputElement).value = data.pullupNote || '';
         (document.getElementById('standingNote') as HTMLInputElement).value = data.standingNote || '';
+        (document.getElementById('ecNote') as HTMLInputElement).value = data.ecNote || '';
       }
 
       dataReady = true;
@@ -173,10 +187,12 @@ import Layout from '../layouts/Layout.astro';
     (document.getElementById('squat') as HTMLInputElement).value = '0';
     (document.getElementById('pullup') as HTMLInputElement).value = '0';
     (document.getElementById('standing') as HTMLInputElement).value = '0';
+    (document.getElementById('ec') as HTMLInputElement).value = '0';
     (document.getElementById('pushupNote') as HTMLInputElement).value = '';
     (document.getElementById('squatNote') as HTMLInputElement).value = '';
     (document.getElementById('pullupNote') as HTMLInputElement).value = '';
     (document.getElementById('standingNote') as HTMLInputElement).value = '';
+    (document.getElementById('ecNote') as HTMLInputElement).value = '';
   }
 
   function syncDateIfNeeded() {
@@ -205,10 +221,12 @@ import Layout from '../layouts/Layout.astro';
       squat: parseInt((document.getElementById('squat') as HTMLInputElement).value) || 0,
       pullup: parseInt((document.getElementById('pullup') as HTMLInputElement).value) || 0,
       standing: parseInt((document.getElementById('standing') as HTMLInputElement).value) || 0,
+      ec: parseInt((document.getElementById('ec') as HTMLInputElement).value) || 0,
       pushupNote: (document.getElementById('pushupNote') as HTMLInputElement).value || '',
       squatNote: (document.getElementById('squatNote') as HTMLInputElement).value || '',
       pullupNote: (document.getElementById('pullupNote') as HTMLInputElement).value || '',
       standingNote: (document.getElementById('standingNote') as HTMLInputElement).value || '',
+      ecNote: (document.getElementById('ecNote') as HTMLInputElement).value || '',
     };
   }
 
@@ -301,6 +319,11 @@ import Layout from '../layouts/Layout.astro';
                   <span class="icon">${item.standing > 0 ? '✅' : '⬜'}</span>
                   <span>站桩 ${item.standing > 0 ? `×${item.standing}` : ''}</span>
                   ${item.standingNote ? `<span class="exercise-note-tag">${item.standingNote}</span>` : ''}
+                </div>
+                <div class="check-item ${item.ec > 0 ? 'checked' : ''}">
+                  <span class="icon">${item.ec > 0 ? '✅' : '⬜'}</span>
+                  <span>EC ${item.ec > 0 ? `×${item.ec}` : ''}</span>
+                  ${item.ecNote ? `<span class="exercise-note-tag">${item.ecNote}</span>` : ''}
                 </div>
               </div>
 
