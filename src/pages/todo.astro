@@ -359,9 +359,26 @@ import Layout from '../layouts/Layout.astro';
         const input = document.getElementById(target) as HTMLInputElement;
         const newVal = Math.max(0, (parseInt(input.value) || 0) + delta);
         input.value = String(newVal);
+        updateNumberInputDensity(input);
       });
     });
+
+    const numberInputs = ['pushup', 'squat', 'pullup', 'standing', 'ec']
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLInputElement[];
+
+    numberInputs.forEach((input) => {
+      updateNumberInputDensity(input);
+      input.addEventListener('input', () => updateNumberInputDensity(input));
+      input.addEventListener('change', () => updateNumberInputDensity(input));
+    });
   });
+
+  function updateNumberInputDensity(input: HTMLInputElement) {
+    const raw = String(input.value ?? '');
+    const digits = raw.replace(/[^\d]/g, '').length;
+    input.classList.toggle('dense', digits >= 3);
+  }
 </script>
 
 <style>
@@ -484,13 +501,20 @@ import Layout from '../layouts/Layout.astro';
   }
 
   .number-input-row input[type="number"] {
-    width: 2.2rem;
+    width: clamp(2.6rem, 6ch, 3.6rem);
+    min-width: 2.6rem;
     text-align: center;
-    padding: 0.15rem 0.1rem;
+    padding: 0.15rem 0.2rem;
     font-size: 0.95rem;
     font-weight: 600;
     border: 1px solid var(--color-border);
     border-radius: var(--radius);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .number-input-row input[type="number"].dense {
+    font-size: 0.85rem;
+    padding: 0.12rem 0.15rem;
   }
 
   .count-btn {
